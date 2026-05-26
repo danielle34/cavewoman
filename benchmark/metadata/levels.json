@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1",
+  "spacy_model": "en_core_web_sm",
+  "tag_scheme": "PennTreebank",
+  "levels": [
+    {
+      "id": "L0",
+      "short": "unconstrained",
+      "max_output_tokens": 400,
+      "condition_a": {"rule": "none"},
+      "condition_b": {"register": "full prose with Answer-on-its-own-line"}
+    },
+    {
+      "id": "L1",
+      "short": "telegraphic",
+      "max_output_tokens": 300,
+      "condition_a": {"rule": "drop_tags", "drop_tags": ["DT", "IN", "CC", "RP", "TO", "MD"]},
+      "condition_b": {"register": "telegraphic; no articles, conjunctions, prepositions"}
+    },
+    {
+      "id": "L2",
+      "short": "keyword_only",
+      "max_output_tokens": 200,
+      "condition_a": {"rule": "keep_tags", "keep_tags": ["NN", "NNS", "NNP", "NNPS", "VB", "VBZ", "VBD", "VBN", "VBG", "CD"]},
+      "condition_b": {"register": "nouns + main verbs + numbers only; no grammar"}
+    },
+    {
+      "id": "L3",
+      "short": "noun_phrase_skeleton",
+      "max_output_tokens": 150,
+      "condition_a": {"rule": "keep_tags", "keep_tags": ["NN", "NNS", "NNP", "NNPS", "CD"]},
+      "condition_b": {"register": "no verbs of any kind"}
+    },
+    {
+      "id": "L4",
+      "short": "hard_15_token_budget",
+      "max_output_tokens": 20,
+      "condition_a": {"rule": "first_n_whitespace_tokens", "n": 15},
+      "condition_b": {"register": "entire response 15 tokens or fewer"}
+    }
+  ]
+}

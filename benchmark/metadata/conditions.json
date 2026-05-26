@@ -1,0 +1,17 @@
+{
+  "schema_version": "0.1",
+  "conditions": [
+    {
+      "tag": "A",
+      "alias": "input",
+      "short": "input compression",
+      "description": "The user message is filtered through deterministic spaCy POS rules at level Lk before reaching the model. The system prompt is the neutral string."
+    },
+    {
+      "tag": "B",
+      "alias": "output",
+      "short": "output constraint",
+      "description": "The user message is unchanged. The system prompt constrains the response register at level Lk."
+    }
+  ]
+}

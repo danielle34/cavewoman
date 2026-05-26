@@ -1,0 +1,75 @@
+.env
+.env.*
+*.token
+*.pem
+*.key
+hf_token.txt
+secrets.json
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+build/
+dist/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# --- Notebooks --------------------------------------------------------------
+.ipynb_checkpoints/
+
+# --- Virtualenv / conda local dirs ------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+
+# --- HuggingFace / sentence-transformers caches if ever placed locally ------
+.cache/
+huggingface/
+.huggingface/
+
+# --- Local model weights ----------------------------------------------------
+# Released results reference upstream model IDs, not vendored weights.
+/models/
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.pth
+
+# --- Logs and scratch runs --------------------------------------------------
+logs/
+*.log
+# Local smoke-test output dirs created by scripts/smoke_test_engaging.sh
+# (they live under ../results/, but block them if a user redirects here).
+smoke_test_*/
+
+# --- Editor / OS noise ------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Site local previews ----------------------------------------------------
+# python -m http.server byproducts and similar.
+.cache-loader/
+node_modules/
+
+# --- Local-only TODO scratch ------------------------------------------------
+TODO.local.md
+NOTES.local.md
+scratch/

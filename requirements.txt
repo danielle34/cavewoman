@@ -1,0 +1,31 @@
+# Core runtime dependencies for CAVEWOMAN.
+# Pin exact versions in a lockfile if you need bit-reproducible runs;
+# these constraints reflect what the released results were produced with.
+
+# Data loading and HuggingFace integration
+datasets>=2.18
+transformers>=4.40
+huggingface_hub>=0.23
+
+# Local-model inference
+torch>=2.2
+accelerate>=0.28
+
+# API model clients
+openai>=1.30
+anthropic>=0.28
+python-dotenv>=1.0
+
+# Input compression (POS-based filtering)
+spacy>=3.7
+
+# Semantic-fidelity scoring
+sentence-transformers>=2.7
+
+# Numerics, stats, plotting
+numpy>=1.24
+scipy>=1.11
+pandas>=2.1
+tqdm>=4.66
+pyyaml>=6.0
+matplotlib>=3.8

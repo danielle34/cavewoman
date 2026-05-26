@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.2",
+  "primary_judge": {
+    "name": "deberta_v3_large_mnli",
+    "model_id": "MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli",
+    "criterion": "bidirectional entailment >= 0.5"
+  },
+  "metrics": [
+    {"id": "01", "name": "bertscore",            "family": "token_level",            "page": "01_bertscore.md"},
+    {"id": "02", "name": "bart_mnli",            "family": "nli_diff_architecture",  "page": "02_bart_nli.md"},
+    {"id": "03", "name": "qa_eval",              "family": "qa_based",               "page": "03_qa_eval.md"},
+    {"id": "04", "name": "stsb_crossencoder",    "family": "sts",                    "page": "04_stsb_crossencoder.md"},
+    {"id": "05", "name": "answer_entailment",    "family": "anchored_entailment",    "page": "05_answer_entailment.md"},
+    {"id": "06", "name": "deberta_large_mnli",   "family": "nli_bigger_same_family", "page": "06_deberta_large_nli.md"},
+    {"id": "07", "name": "minicheck",            "family": "fact_check",             "page": "07_minicheck.md"},
+    {"id": "08", "name": "multilingual_nli",     "family": "nli_multilingual",       "page": "08_multilingual_nli.md"},
+    {"id": "12", "name": "bleurt_large",         "family": "learned_similarity",     "page": "12_bleurt_large.md"},
+    {"id": "13", "name": "rouge",                "family": "surface_overlap",        "page": "13_rouge.md"},
+    {"id": "14", "name": "meteor",               "family": "surface_overlap_synonymy","page": "14_meteor.md"},
+    {"id": "17", "name": "e5_cosine",            "family": "embedding_cosine",       "page": "17_use_cosine.md"}
+  ],
+  "_note": "The twelve metrics above are the paper's alternative semantic battery (tab:alt_metrics in cavewoman.tex), independent of the primary DeBERTa-v3 bidirectional judge and its forward-only/soft variants. Four further metric pages (mpnet_cosine, qwen32b_judge, qwen32b_logits, prometheus) exist on disk under evaluation/semantic_validation/methods/ as supplementary computations but are not part of the paper's twelve and are intentionally omitted here."
+}

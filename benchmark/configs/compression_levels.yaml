@@ -1,0 +1,80 @@
+# CAVEWOMAN, canonical compression-level specification.
+#
+# This file is the single machine-readable source of truth for the
+# L0..L4 definitions. Both conditions (input / output) use the same
+# level identifiers.
+#
+# Reference implementations: src/constraint_prompts.py (Condition B
+# system prompts) and src/dataset_loader_multi.py (Condition A POS filter).
+
+version: 0.1
+spacy_model: en_core_web_sm
+penntreebank_tags: true
+
+levels:
+, id: L0
+    short: unconstrained
+    description: Full sentences, complete chain-of-thought reasoning.
+    max_output_tokens: 400
+    condition_a:
+      rule: none
+      effect: Question unchanged.
+    condition_b:
+      register: 'Unconstrained, full prose, "Answer: <answer>" on its own line at end.'
+
+, id: L1
+    short: telegraphic
+    description: No function words (articles, conjunctions, prepositions).
+    max_output_tokens: 300
+    condition_a:
+      rule: drop_tags
+      drop_tags: ["DT", "IN", "CC", "RP", "TO", "MD"]
+      effect: Drop determiners, prepositions, conjunctions, particles, infinitival "to", modals.
+    condition_b:
+      register: 'Telegraphic. Reasoning steps as short fragments. End with "Answer: <answer>".'
+
+, id: L2
+    short: keyword_only
+    description: Nouns and main verbs only, fragments and lists.
+    max_output_tokens: 200
+    condition_a:
+      rule: keep_tags
+      keep_tags: ["NN", "NNS", "NNP", "NNPS",
+                  "VB", "VBZ", "VBD", "VBN", "VBG",
+                  "CD"]
+      effect: Keep nouns + main verbs + numbers.
+    condition_b:
+      register: 'Keyword-only. No grammar, no full sentences. End with "Answer: <answer>".'
+
+, id: L3
+    short: noun_phrase_skeleton
+    description: No verbs, only nominal fragments and numbers.
+    max_output_tokens: 150
+    condition_a:
+      rule: keep_tags
+      keep_tags: ["NN", "NNS", "NNP", "NNPS", "CD"]
+      effect: Keep nouns + numbers (no verbs).
+    condition_b:
+      register: 'Noun-phrase skeleton. No verbs of any kind. End with "Answer: <answer>".'
+
+, id: L4
+    short: hard_15_token_budget
+    description: Hard token budget, entire response must be 15 tokens or fewer.
+    max_output_tokens: 20
+    condition_a:
+      rule: first_n_whitespace_tokens
+      n: 15
+      effect: First 15 whitespace tokens of the question.
+    condition_b:
+      register: Entire response 15 tokens or fewer. Prefer raw answer over prose.
+
+answer_format_hint: |
+  The final-line answer matches what the question asks for: a number
+  for numeric questions, 'yes' or 'no' for yes/no questions, or a single
+  letter (A, B, C, ...) for multiple-choice questions.
+
+empty_after_filter_policy: |
+  If POS filtering at a given level produces an empty string, the
+  function logs a warning and returns the original text. The per-record
+  output marks this with empty_after_filter = true so it can be
+  excluded from analyses.

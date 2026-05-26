@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+        content="CAVEWOMAN: how large language models behave under linguistic input and output compression.">
+  <title>CAVEWOMAN: How LLMs behave under linguistic input and output compression</title>
+
+  <!-- Fonts (same family as the Nerfies template) -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+
+  <!-- Bulma -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <!-- Academic Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <!-- Page-specific -->
+  <link rel="stylesheet" href="static/css/index.css">
+</head>
+
+<body>
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <h1 class="title is-1 publication-title">CAVEWOMAN</h1>
+
+          <h2 class="subtitle is-4 publication-subtitle">
+            How large language models behave under linguistic input and output compression
+          </h2>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              Morayo Danielle Adeyemi<sup>1</sup>,
+            </span>
+            <span class="author-block">
+              Ryan Rossi<sup>2</sup>,
+            </span>
+            <span class="author-block">
+              Franck Dernoncourt<sup>2</sup>
+            </span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 0.6rem; color: #4a4a4a;">
+            <span class="author-block"><sup>1</sup>Independent</span> &nbsp;
+            <span class="author-block"><sup>2</sup>Adobe Research</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2606.24083" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+
+              <span class="link-block">
+                <a href="https://github.com/danielle34/cavewoman" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+
+              <span class="link-block">
+                <a href="https://huggingface.co/datasets/rayascript/cavewoman-data" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
+                  <span class="icon"><i class="fas fa-database"></i></span>
+                  <span>Data</span>
+                </a>
+              </span>
+
+              <span class="link-block">
+                <a href="#BibTeX" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-quote-left"></i></span>
+                  <span>BibTeX</span>
+                </a>
+              </span>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TEASER FIGURE
+============================================================ -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <figure>
+      <img src="static/images/cavewoman_hero.png"
+           alt="CAVEWOMAN hero illustration.">
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================
+     ABSTRACT
+============================================================ -->
+<section class="section" id="abstract">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            <em>"Talk short. Drop grammar. Save token."</em> This caveman style is widely promoted as a way to cut large-language-model inference cost, but whether it actually saves anything depends on which channel, the user's prompt or the model's response, is being compressed.
+          </p>
+          <p>
+            We present CAVEWOMAN, a two-channel evaluation protocol that scores every generation on task accuracy, realized per-item cost, and surface-text preservation against the model's unconstrained reference.
+          </p>
+          <p>
+            We evaluate nine models (GPT-5.4, GPT-4o, Claude Sonnet 4.6, Claude Haiku 4.5, Gemma-4-E4B, Kimi-K2.6, Qwen3.5, Qwen2.5-VL, and DeepSeek-R1) on five reasoning datasets (GSM8K, BoolQ, ARC-Easy, CommonsenseQA, MMLU-STEM) at five matched reduction levels, with both channels measured on the same items, for a total of 11,465 questions per model and over 1 million model evaluations across the panel.
+          </p>
+          <p>
+            Output compression cuts realized per-item cost across the API panel by 1.4 to 3x at the first reduction level, with the same direction of savings on all four open-weight models under public-tier pricing; the exception is GPT-5.4, whose billed cost is dominated by hidden reasoning tokens that a visible-output constraint cannot shorten. Input compression has the opposite effect, raising net cost by up to 1.8x on individual datasets at the first reduction level and 2.7x at deeper reductions, because models compensate with longer responses. Under the same setting, roughly half of correct generations no longer entail the model's unconstrained reference in surface text. The divergence survives length-controlled re-scoring, Benjamini-Hochberg multiple-comparison correction, and replication under twelve semantic measures. Robustness to compression is not predicted by model size or unconstrained accuracy.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     METHOD
+============================================================ -->
+<section class="section" id="method">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Method</h2>
+        <div class="content has-text-justified">
+          <p>
+            CAVEWOMAN evaluates each (model, dataset) pair under two compression channels at five matched reduction levels. The same item is passed through one channel at a time, and the only thing that changes between channels is where the constraint sits.
+          </p>
+          <p>
+            <strong>Channels.</strong> Condition A (input compression) filters the user prompt through a deterministic spaCy POS rule at level L<sub>k</sub> and uses a neutral system prompt. Condition B (output constraint) leaves the user prompt verbatim and replaces the system prompt with a level-specific register restriction. Levels L0 through L4 progress from unconstrained prose to a hard 15-token budget, and both channels share the same level definitions and the same per-level output cap.
+          </p>
+          <p>
+            <strong>Scoring.</strong> Every generation is scored on three families of metrics. Task accuracy uses a strict answer-extraction rule, paired with a per-cell relaxed-rule audit so that wrong-format responses are not silently counted as wrong. Realized per-item cost is computed from input plus output tokens at each provider's posted list prices, rather than from prompt-token reduction alone. Reference-text preservation is measured by bidirectional NLI between each L<sub>k</sub> response and the same item's L0 response, with twelve complementary semantic measures used as independent corroboration of the primary judge.
+          </p>
+          <p>
+            <strong>Statistics.</strong> Per-cell aggregates are paired with 10,000-resample bootstrap 95 percent confidence intervals at fixed seed. Across-cell comparisons use Benjamini-Hochberg FDR correction. Length-controlled NLI rescoring truncates the L0 reference to the L<sub>k</sub> response length before scoring, and a threshold-ordering analysis confirms the channel ordering at NLI thresholds in {0.3, 0.4, 0.5, 0.6, 0.7}.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     INTERACTIVE LEVEL DEMO
+============================================================ -->
+<section class="section" id="demo">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+
+        <h2 class="title is-3 has-text-centered">Caveman talking, level by level</h2>
+        <p class="has-text-centered" style="color: #555; margin-bottom: 1.5rem;">
+          Pick a level to see its input prompt, its output prompt, and an example response.
+        </p>
+
+        <div class="demo-question">
+          <span class="demo-question-label">Question (shared across levels)</span>
+          <p>
+            Janet's ducks lay 16 eggs per day. She eats three for breakfast, bakes muffins with four, and sells the rest at the farmers' market for $2 per egg. How much does she make daily?
+          </p>
+        </div>
+
+        <div class="tabs is-toggle is-toggle-rounded is-centered level-tabs">
+          <ul>
+            <li class="is-active"><a data-level="L0">L0</a></li>
+            <li><a data-level="L1">L1</a></li>
+            <li><a data-level="L2">L2</a></li>
+            <li><a data-level="L3">L3</a></li>
+            <li><a data-level="L4">L4</a></li>
+          </ul>
+        </div>
+
+        <!-- L0 -->
+        <div class="demo-panel is-active" data-level="L0">
+          <div class="columns">
+            <div class="column">
+              <h4>Input prompt</h4>
+              <div class="content">
+                <p>Janet's ducks lay 16 eggs per day. She eats three for breakfast, bakes muffins with four, and sells the rest at the farmers' market for $2 per egg. How much does she make daily?</p>
+                <p class="demo-hint">Unchanged at L0.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Output prompt</h4>
+              <div class="content">
+                <p>Reason step by step in full grammatical English sentences. Conclude with the final answer on its own line in the form <code>Answer: &lt;answer&gt;</code>.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Example output</h4>
+<pre>Janet has 16 eggs each day.
+She uses 3 for breakfast and 4 for
+muffins, so 7 total. That leaves
+16 - 7 = 9 eggs to sell.
+Each sells for $2, so 9 * 2 = 18.
+
+Answer: 18</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- L1 -->
+        <div class="demo-panel" data-level="L1">
+          <div class="columns">
+            <div class="column">
+              <h4>Input prompt</h4>
+              <div class="content">
+                <p>Janet's ducks lay 16 eggs day. She eats three breakfast, bakes muffins four, sells rest farmers' market $2 egg. How much does she make daily?</p>
+                <p class="demo-hint">Function words dropped: articles, prepositions, conjunctions.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Output prompt</h4>
+              <div class="content">
+                <p>Telegraphic. No articles, conjunctions, or prepositions. Use nouns, main verbs, numbers, and standard symbols. End with <code>Answer: &lt;answer&gt;</code>.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Example output</h4>
+<pre>Eggs 16 day.
+Breakfast 3. Muffins 4. Used 7.
+Remainder 16 - 7 = 9.
+Sell 9 * 2 = 18.
+
+Answer: 18</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- L2 -->
+        <div class="demo-panel" data-level="L2">
+          <div class="columns">
+            <div class="column">
+              <h4>Input prompt</h4>
+              <div class="content">
+                <p>Janet ducks lay 16 eggs day eats three breakfast bakes muffins four sells rest farmers market $2 egg make daily</p>
+                <p class="demo-hint">Nouns, main verbs, and numbers only.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Output prompt</h4>
+              <div class="content">
+                <p>Keyword only. Use nouns and main verbs only. No grammar, no full sentences. Output as fragments or list items.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Example output</h4>
+<pre>Eggs: 16
+Eat: 3, bake: 4
+Used: 7
+Remaining: 9
+Price: $2
+Total: $18
+
+Answer: 18</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- L3 -->
+        <div class="demo-panel" data-level="L3">
+          <div class="columns">
+            <div class="column">
+              <h4>Input prompt</h4>
+              <div class="content">
+                <p>Janet ducks 16 eggs day three breakfast muffins four rest farmers market $2 egg daily</p>
+                <p class="demo-hint">Nouns and numbers only. No verbs.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Output prompt</h4>
+              <div class="content">
+                <p>Noun-phrase skeleton. No verbs of any kind. Nominal fragments, numbers, and standard symbols only.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Example output</h4>
+<pre>Eggs per day: 16
+Breakfast use: 3
+Muffin use: 4
+Total use: 7
+Remainder: 9
+Price per egg: $2
+Daily revenue: $18
+
+Answer: 18</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- L4 -->
+        <div class="demo-panel" data-level="L4">
+          <div class="columns">
+            <div class="column">
+              <h4>Input prompt</h4>
+              <div class="content">
+                <p>Janet's ducks lay 16 eggs per day. She eats three for breakfast, bakes muffins with</p>
+                <p class="demo-hint">First 15 whitespace tokens.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Output prompt</h4>
+              <div class="content">
+                <p>Hard 15-token budget. The entire response must be 15 tokens or fewer. Prefer the raw answer over prose.</p>
+              </div>
+            </div>
+            <div class="column">
+              <h4>Example output</h4>
+<pre>Answer: 18</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CONCLUSION
+============================================================ -->
+<section class="section" id="conclusion">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Conclusion</h2>
+        <div class="content has-text-justified">
+          <p>
+            Compressing language-model inference is a two-channel problem, and accuracy alone cannot tell the channels apart. The cost story and the meaning story decouple from each other: a compressed response can be cheaper and still arrive at the right answer while no longer being a faithful representation of what the model would have said unconstrained. Single-axis evaluation can therefore mis-rank methods on the dimension that ultimately determines deployment cost.
+          </p>
+          <p>
+            The practical takeaway is that compression strategies should be tested at the deployment constraint, not evaluated at the unconstrained baseline, because the model ranking changes between the two. As inference becomes the dominant cost line for production language-model systems, understanding which caveman strategies actually save anything, and which only appear to on prompt-token reduction alone, is part of the engineering problem.
+          </p>
+          <p>
+            CAVEWOMAN is released with the complete prompt set, per-cell summaries, the validation suite, and the scripts that produced each table and figure.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ACKNOWLEDGEMENTS
+============================================================ -->
+<section class="section" id="acknowledgements">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Acknowledgements</h2>
+        <div class="content">
+          <p>
+            We thank MIT Engaging for providing the GPU compute used to run the local-model sweep. We also acknowledge the maintainers of the open-source tools the work depends on, including spaCy, Hugging Face Transformers, and sentence-transformers.
+          </p>
+          <p>
+            This webpage template is adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>, under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0 License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     BIBTEX
+============================================================ -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">BibTeX</h2>
+<pre><code>@misc{adeyemi2026cavewoman,
+  title         = {CAVEWOMAN: How Large Language Models Behave Under
+                   Linguistic Input and Output Compression},
+  author        = {Adeyemi, Morayo Danielle and Rossi, Ryan A. and Dernoncourt, Franck},
+  year          = {2026},
+  eprint        = {2606.24083},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2606.24083}
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer class="footer">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-8 has-text-centered">
+        <p>
+          <a class="icon-link" href="https://arxiv.org/pdf/2606.24083" aria-label="Paper PDF" target="_blank" rel="noopener noreferrer">
+            <i class="fas fa-file-pdf"></i>
+          </a>
+          <a class="icon-link" href="https://github.com/danielle34/cavewoman" aria-label="Code on GitHub" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-github"></i>
+          </a>
+          <a class="icon-link" href="https://arxiv.org/abs/2606.24083" aria-label="arXiv" target="_blank" rel="noopener noreferrer">
+            <i class="ai ai-arxiv"></i>
+          </a>
+        </p>
+        <div class="content">
+          <p>
+            This website template is adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>, under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0 License</a>. Page content describes the CAVEWOMAN evaluation and is released under the same license. CAVEWOMAN code is released under the license noted in the project repository.
+          </p>
+          <p>
+            <span class="has-text-grey">&copy; 2026 the CAVEWOMAN authors.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="static/js/index.js"></script>
+
+</body>
+</html>

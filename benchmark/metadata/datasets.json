@@ -1,0 +1,50 @@
+{
+  "schema_version": "0.1",
+  "datasets": [
+    {
+      "tag": "gsm8k",
+      "hf_id": "openai/gsm8k",
+      "hf_subset": "main",
+      "split": "test",
+      "answer_type": "number",
+      "license": "MIT",
+      "citation": "Cobbe et al. 2021"
+    },
+    {
+      "tag": "boolq",
+      "hf_id": "google/boolq",
+      "hf_subset": null,
+      "split": "validation",
+      "answer_type": "yes_no",
+      "license": "CC-BY-SA-3.0",
+      "citation": "Clark et al. 2019"
+    },
+    {
+      "tag": "arc_easy",
+      "hf_id": "allenai/ai2_arc",
+      "hf_subset": "ARC-Easy",
+      "split": "test",
+      "answer_type": "mc_letter",
+      "license": "CC-BY-SA-4.0",
+      "citation": "Clark et al. 2018"
+    },
+    {
+      "tag": "commonsenseqa",
+      "hf_id": "tau/commonsense_qa",
+      "hf_subset": null,
+      "split": "validation",
+      "answer_type": "mc_letter",
+      "license": "MIT",
+      "citation": "Talmor et al. 2019"
+    },
+    {
+      "tag": "mmlu_stem",
+      "hf_id": "cais/mmlu",
+      "hf_subset": "STEM subjects (see benchmark/datasets/per_dataset/mmlu_stem.md)",
+      "split": "test",
+      "answer_type": "mc_letter",
+      "license": "MIT",
+      "citation": "Hendrycks et al. 2020"
+    }
+  ]
+}

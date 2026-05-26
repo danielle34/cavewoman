@@ -1,0 +1,103 @@
+{
+  "schema_version": "0.1",
+  "models": [
+    {
+      "tag": "qwen-2.5",
+      "family": "qwen-2.5",
+      "provider": "huggingface",
+      "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "context_window": 32768,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "imputed", "input_per_1k": 0.0, "output_per_1k": 0.0, "imputed_basis": "open-weight; not on the priced channel"},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "qwen-3.5",
+      "family": "qwen-3.5",
+      "provider": "huggingface",
+      "model_id": "Qwen/Qwen3.5-9B",
+      "context_window": 32768,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "imputed", "input_per_1k": 0.0, "output_per_1k": 0.0, "imputed_basis": "open-weight; not on the priced channel"},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "deepseek-r1",
+      "family": "deepseek-r1",
+      "provider": "huggingface",
+      "model_id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+      "context_window": 32768,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "imputed", "input_per_1k": 0.0, "output_per_1k": 0.0, "imputed_basis": "open-weight; not on the priced channel"},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "gemma-4",
+      "family": "gemma-4",
+      "provider": "huggingface",
+      "model_id": "google/gemma-4-e4b-it",
+      "context_window": 32768,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "imputed", "input_per_1k": 0.0, "output_per_1k": 0.0, "imputed_basis": "open-weight; not on the priced channel"},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "gpt-4o",
+      "family": "openai",
+      "provider": "openai",
+      "model_id": "gpt-4o-2024-11-20",
+      "context_window": 128000,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "vendor_list_may_2026", "input_per_1k": 2.5e-3, "output_per_1k": 10e-3, "imputed_basis": null},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "gpt-5.4",
+      "family": "openai",
+      "provider": "openai",
+      "model_id": "gpt-5-2025-08-07",
+      "context_window": 128000,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "vendor_list_may_2026", "input_per_1k": 1.25e-3, "output_per_1k": 10e-3, "imputed_basis": null},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "sonnet-4.6",
+      "family": "anthropic",
+      "provider": "anthropic",
+      "model_id": "claude-sonnet-4-6-20250929",
+      "context_window": 200000,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "vendor_list_may_2026", "input_per_1k": 3e-3, "output_per_1k": 15e-3, "imputed_basis": null},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "haiku-4.5",
+      "family": "anthropic",
+      "provider": "anthropic",
+      "model_id": "claude-haiku-4-5-20251001",
+      "context_window": 200000,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 400, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "vendor_list_may_2026", "input_per_1k": 1e-3, "output_per_1k": 5e-3, "imputed_basis": null},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true}
+    },
+    {
+      "tag": "kimi-k2.6",
+      "family": "moonshot",
+      "provider": "azure_openai",
+      "model_id": "Kimi-K2.6",
+      "context_window": 128000,
+      "decoding": {"temperature": 0, "max_new_tokens_per_level": {"L0": 1200, "L1": 300, "L2": 200, "L3": 150, "L4": 20}},
+      "pricing": {"source": "vendor_list_may_2026", "input_per_1k": 0.95e-3, "output_per_1k": 4e-3, "imputed_basis": null},
+      "run_status": {"input_full_sweep": true, "output_full_sweep": true},
+      "headline_inclusion": false,
+      "appendix_only": "Reported in the paper appendix as the excluded reasoning model; hidden reasoning tokens count against max_tokens but are not returned in message content, so the L0 budget is raised to 1200."
+    }
+  ],
+  "notes": [
+    "Pricing values are vendor list prices at run time (May 2026), expressed per 1k tokens. Multiply by 1000 to get per-million.",
+    "Open-weight models (qwen-2.5, qwen-3.5, deepseek-r1, gemma-4) are excluded from the priced channel in the paper; the pricing fields are zeroed.",
+    "Open-weight hardware: 1x NVIDIA L40S 48GB at bfloat16.",
+    "Kimi-K2.6 is run on the same protocol as the headline panel but is reported in the appendix as the excluded reasoning model (see headline_inclusion=false)."
+  ]
+}

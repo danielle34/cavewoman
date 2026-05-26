@@ -1,0 +1,94 @@
+# CAVEWOMAN analysis pipeline configuration.
+# Override any path at runtime with `--config /path/to/your.yaml`.
+
+paths:
+  # Root containing <model>_<condition>/<dataset>/caveman_*.jsonl
+  # Override with --config to point at your own results tree.
+  results_root: "../../results"
+  # Where this pipeline writes its outputs
+  output_root:  "./analysis_outputs"
+
+# Expected experiment design
+design:
+  models:
+    - gpt-4o
+    - gpt-5.4
+    - haiku-4.5
+    - sonnet-4.6
+    - qwen-2.5
+    - qwen-3.5
+    - deepseek-r1
+    - gemma-4
+    - kimi-k2.6
+  conditions: [output, input]    # A = output constraint, B = input compression
+  levels:     [L0, L1, L2, L3, L4]
+  datasets:
+    gsm8k:         {n_expected: 1319, task_type: math}
+    boolq:         {n_expected: 3270, task_type: reading_comprehension}
+    arc_easy:      {n_expected: 2376, task_type: multiple_choice}
+    commonsenseqa: {n_expected: 1221, task_type: multiple_choice}
+    mmlu_stem:     {n_expected: 3279, task_type: multiple_choice}
+
+# Map your file column names → canonical names the pipeline uses internally.
+# If your files already use these names you can leave the values as-is.
+columns:
+  idx:                         idx
+  model:                       model
+  dataset:                     dataset
+  condition:                   condition
+  level:                       level
+  correct:                     correct
+  predicted_answer:            predicted_answer
+  gt_answer:                   gt_answer
+  output:                      output
+  input_tokens:                input_tokens
+  output_tokens:               output_tokens
+  cost_usd:                    cost_usd
+  bidirectional_entailment:    bidirectional_entailment
+  lx_entails_l0_prob:          lx_entails_l0_prob
+  l0_entails_lx_prob:          l0_entails_lx_prob
+  embedding_similarity:        embedding_similarity
+
+# File-name template, relative to results_root. Substitution variables:
+#   {model_tag}, {dataset}, {condition}, {level}
+file_template: "{model_tag}_{condition}/{dataset}/caveman_{model_tag}_{dataset}_{condition}_{level}.jsonl"
+
+# Augmentation filename suffixes (appended before .jsonl)
+augmentation_suffixes:
+  entailment: "_with_entailment"
+  embeddings: "_with_embeddings"
+
+# Thresholds and analysis parameters
+thresholds:
+  semantic_collapse_cosine: 0.3       # cosine < this counts as collapse
+  accuracy_collapse_rel:   0.5        # accuracy < 0.5 * L0_accuracy counts as collapse
+  pareto_metric_primary:   accuracy
+  pareto_metric_cost:      cost_usd
+
+# Bootstrap and statistical settings
+stats:
+  bootstrap_n:           2000         # iterations per bootstrap CI
+  bootstrap_ci:          0.95
+  multiple_comparison:   holm-bonferroni    # also supports: benjamini-hochberg, none
+  rng_seed:              42
+
+# API pricing in $USD per 1M tokens (input, output).
+# Used by token_economics.py, override or add models with --config.
+pricing:
+  gpt-4o:         {input: 2.50,  output: 10.00}
+  gpt-5.4:        {input: 5.00,  output: 20.00}  # placeholder until vendor publishes rates
+  haiku-4.5:      {input: 1.00,  output:  5.00}  # Claude Haiku 4.5
+  sonnet-4.6:     {input: 3.00,  output: 15.00}  # Claude Sonnet 4.6
+  kimi-k2.6:      {input: 0.95,  output:  4.00}  # Moonshot Kimi-K2.6 (cache-miss input rate)
+  # Local models (no marginal cost); set to 0 to skip cost analysis
+  qwen-2.5:       {input: 0.0,   output: 0.0}
+  qwen-3.5:       {input: 0.0,   output: 0.0}
+  deepseek-r1:    {input: 0.0,   output: 0.0}    # local checkpoint
+  gemma-4:        {input: 0.0,   output: 0.0}    # local checkpoint
+
+# Plot styling
+figures:
+  dpi:        150
+  format:     png        # or pdf
+  font_size:  11
+  fig_size:   [9, 5.5]

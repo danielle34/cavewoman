@@ -1,0 +1,29 @@
+{
+  "_comment": "Example per-run config the underlying runner consumes. Paths are illustrative; replace with your own.",
+  "model_name": "qwen-2.5",
+  "model_path": "/path/to/Qwen2.5-VL-7B-Instruct",
+  "model_dir_name": "Qwen2.5-VL-7B-Instruct",
+  "dataset": "gsm8k",
+  "condition": "input",
+  "levels": ["L0", "L1", "L2", "L3", "L4"],
+  "split": "test",
+  "n": null,
+  "output": "/path/to/results/qwen-2.5_input/gsm8k",
+  "seed": 42,
+  "decoding": {
+    "temperature": 0,
+    "do_sample": false
+  },
+  "max_new_tokens_per_level": {
+    "L0": 400,
+    "L1": 300,
+    "L2": 200,
+    "L3": 150,
+    "L4": 20
+  },
+  "no_resume": false,
+  "_provenance": {
+    "source": "Example mirrors the run_config.json that experiments/run_experiment.py writes alongside each per-cell JSONL.",
+    "schema_version": "0.1"
+  }
+}
