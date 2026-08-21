@@ -1,8 +1,8 @@
-# CAVEWOMAN: How Large Language Models Behave Under Linguistic Input and Output Compression
+# CAVEWOMAN: How Large Language Models Behave Under Linguistic Input and Output Compression (EMNLP 2026)
 
 ![CAVEWOMAN](cavewoman_hero.png)
 
-*Paper: [arXiv:2606.24083](https://arxiv.org/abs/2606.24083).*
+*Paper: [arXiv:2606.24083](https://arxiv.org/abs/2606.24083).* (EMNLP 2026 Main Track)
 
 **Dataset:** model generations are released on Hugging Face at [rayascript/cavewoman-data](https://huggingface.co/datasets/rayascript/cavewoman-data).
 
@@ -59,6 +59,8 @@ python evaluation/evaluate_results.py --results_dir ./results/gpt4o_output/gsm8k
 - **[scripts/](scripts/)**: small utilities (`pos_filter_demo.py`, `smoke_test_slurm.sh`).
 
 ## Cite
+
+Preprint of our EMNLP 2026 paper: 
 
 ```bibtex
 @misc{adeyemi2026cavewoman,
