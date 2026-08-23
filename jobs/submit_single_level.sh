@@ -50,9 +50,9 @@ if [ -z "${SLURM_JOB_ID:-}" ]; then
     echo "[launcher] submitting single-level run for $LEVEL ..."
     exec sbatch \
         --export=ALL,CAVEWOMAN_LEVEL="$LEVEL" \
-        --job-name="caveman_${LEVEL}" \
-        --output="$LOGS_DIR/caveman_${LEVEL}_%j.out" \
-        --error="$LOGS_DIR/caveman_${LEVEL}_%j.err" \
+        --job-name="cavewoman_${LEVEL}" \
+        --output="$LOGS_DIR/cavewoman_${LEVEL}_%j.out" \
+        --error="$LOGS_DIR/cavewoman_${LEVEL}_%j.err" \
         "$0"
 fi
 

@@ -20,11 +20,21 @@ import json
 from pathlib import Path
 from typing import Dict, List
 
-REPO = Path(__file__).resolve().parents[2]
-OUT_DIR = REPO / "results" / "audits"
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO = _REPO_ROOT
+import sys as _sys
+_sys.path.insert(0, str(_REPO_ROOT / "src"))
+from release_paths import results_root  # noqa: E402
+_RESULTS = results_root(_REPO_ROOT / "results")
+
+OUT_DIR = _RESULTS / "audits"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-MODELS = ["qwen-2.5", "qwen-3.5", "deepseek-r1", "gemma-4", "gpt-4o", "gpt-5.4", "haiku-4.5", "sonnet-4.6"]
+# All nine models. Kimi-K2.6 is included: its reported result is that
+# constrained-output responses return empty visible text, which is a
+# parse-rate observation (see the reasoning-token appendix).
+MODELS = ["qwen2.5", "qwen3.5", "deepseek", "gemma4", "gpt4o", "gpt5.4", "haiku", "sonnet",
+          "kimi"]
 DATASETS = ["gsm8k", "boolq", "arc_easy", "commonsenseqa", "mmlu_stem"]
 CONDITIONS = ["input", "output"]
 LEVELS = ["L0", "L1", "L2", "L3", "L4"]
@@ -35,7 +45,7 @@ def parse_rate(jsonl_path: Path) -> Dict:
         return {"n": 0, "parsed": 0, "rate": None}
     n = 0
     parsed = 0
-    with jsonl_path.open() as f:
+    with jsonl_path.open(encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -54,7 +64,7 @@ def main():
         for d in DATASETS:
             for c in CONDITIONS:
                 for lvl in LEVELS:
-                    p = REPO / "results" / f"{m}_{c}" / d / f"caveman_{m}_{d}_{c}_{lvl}.jsonl"
+                    p = _RESULTS / f"{m}_{c}" / d / f"caveman_{m}_{d}_{c}_{lvl}.jsonl"
                     stats = parse_rate(p)
                     rows.append({
                         "model": m,
@@ -67,7 +77,7 @@ def main():
                     })
 
     cell_path = OUT_DIR / "cell_table.csv"
-    with cell_path.open("w", newline="") as f:
+    with cell_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["model", "dataset", "condition", "level", "n", "parsed", "parse_rate"])
         w.writeheader()
         for r in rows:
@@ -82,7 +92,7 @@ def main():
                 l0 = next((r for r in rows if r["model"] == m and r["dataset"] == d and r["condition"] == c and r["level"] == "L0"), None)
                 l1 = next((r for r in rows if r["model"] == m and r["dataset"] == d and r["condition"] == c and r["level"] == "L1"), None)
                 if l0 and l1 and l0["parse_rate"] is not None and l1["parse_rate"] is not None:
-                    gap = l1["parse_rate"], l0["parse_rate"]
+                    gap = l1["parse_rate"] - l0["parse_rate"]
                     gap_rows.append({
                         "model": m, "dataset": d, "condition": c,
                         "L0_parse_rate": l0["parse_rate"],
@@ -93,7 +103,7 @@ def main():
                         flagged.append({"model": m, "dataset": d, "condition": c, "L0_parse_rate": l0["parse_rate"]})
 
     gap_path = OUT_DIR / "L0_vs_L1_gap.csv"
-    with gap_path.open("w", newline="") as f:
+    with gap_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["model", "dataset", "condition", "L0_parse_rate", "L1_parse_rate", "L1_minus_L0"])
         w.writeheader()
         for r in gap_rows:
@@ -107,7 +117,7 @@ def main():
         "mean_L1_parse_rate": sum(r["L1_parse_rate"] for r in gap_rows) / max(1, len(gap_rows)),
         "biggest_L0_to_L1_gap_cells": sorted(gap_rows, key=lambda x: -x["L1_minus_L0"])[:10],
     }
-    (OUT_DIR / "_summary.json").write_text(json.dumps(summary, indent=2, default=str))
+    (OUT_DIR / "_summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
     print(f"[extraction] wrote {len(rows)} rows to {cell_path}")
     print(f"[extraction] {len(flagged)} (model,ds,cond) cells with L0 parse_rate < 0.95")
     print(f"[extraction] mean L0 parse rate = {summary['mean_L0_parse_rate']:.4f}")

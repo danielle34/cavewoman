@@ -7,7 +7,7 @@ Usage:
     python evaluate_results.py --results_dir results/run_20260511_154322
     python evaluate_results.py --results_dir results/run_xxx --output reports/run_xxx
 
-Reads any subset of caveman_gsm8k_L{0..4}.jsonl that's present and skips the
+Reads any subset of the five per-level JSONLs that is present and skips the
 rest. Cross-level analyses require >= 2 levels with data.
 """
 
@@ -25,7 +25,7 @@ import numpy as np
 from scipy import stats
 
 # Reuse the canonical per-level aggregator.
-_SCRIPTS_DIR = Path(__file__).resolve().parent / "scripts"
+_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "src"
 sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from constraint_prompts import LEVEL_ORDER  # noqa: E402
@@ -41,7 +41,7 @@ def parse_args():
     p.add_argument(
         "--results_dir",
         required=True,
-        help="Directory containing caveman_gsm8k_L*.jsonl files.",
+        help="Directory containing one cell's caveman_*_L*.jsonl files.",
     )
     p.add_argument(
         "--output",
@@ -55,7 +55,7 @@ def parse_args():
 
 def _read_jsonl(path: Path) -> List[Dict]:
     out: List[Dict] = []
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -75,14 +75,32 @@ def _level_num(level: str) -> int:
 
 # ---------- analysis ----------
 
+def _find_level_file(results_dir: Path, lvl: str):
+    """Locate this level's generation file.
+
+    Runners write caveman_<model>_<dataset>_<condition>_<level>.jsonl; older
+    single-dataset runs wrote caveman_gsm8k_<level>.jsonl. Scored sidecars
+    (_with_entailment, _paired, ...) and the L0 reference are not the raw cell,
+    so they are excluded.
+    """
+    exact = results_dir / f"caveman_gsm8k_{lvl}.jsonl"
+    if exact.exists():
+        return exact
+    hits = sorted(
+        p for p in results_dir.glob(f"caveman_*_{lvl}.jsonl")
+        if not p.stem.endswith(("_with_entailment", "_with_embeddings", "_paired"))
+    )
+    return hits[0] if hits else None
+
+
 def evaluate(results_dir: Path) -> Dict:
     per_level: Dict[str, Dict] = {}
     levels_analyzed: List[str] = []
 
     for lvl in LEVEL_ORDER:
-        f = results_dir / f"caveman_gsm8k_{lvl}.jsonl"
-        if not f.exists():
-            print(f"[skip] {lvl}: no file at {f.name}")
+        f = _find_level_file(results_dir, lvl)
+        if f is None:
+            print(f"[skip] {lvl}: no caveman_*_{lvl}.jsonl in {results_dir}")
             continue
         records = _read_jsonl(f)
         if not records:
@@ -118,11 +136,11 @@ def evaluate(results_dir: Path) -> Dict:
         "n_levels": int(len(levels_analyzed)),
     }
 
-    # 2) Threshold scan: drop[i] = acc(L_{i-1}), acc(L_i). Positive = decrease.
+    # 2) Threshold scan: drop[i] = acc(L_{i-1}) - acc(L_i). Positive = decrease.
     drops: List[Dict] = []
     for i in range(1, len(levels_analyzed)):
-        prev_lvl, cur_lvl = levels_analyzed[i, 1], levels_analyzed[i]
-        drop = float(per_level[prev_lvl]["accuracy"], per_level[cur_lvl]["accuracy"])
+        prev_lvl, cur_lvl = levels_analyzed[i - 1], levels_analyzed[i]
+        drop = float(per_level[prev_lvl]["accuracy"] - per_level[cur_lvl]["accuracy"])
         drops.append({"from_level": prev_lvl, "to_level": cur_lvl, "drop": drop})
     largest_drop = max(drops, key=lambda d: d["drop"])
 
@@ -214,7 +232,7 @@ def write_csv(per_level: Dict[str, Dict], path: Path) -> None:
         "mean_output_tokens", "median_output_tokens",
         "mean_info_density", "l4_budget_violations",
     ]
-    with open(path, "w", newline="") as f:
+    with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(cols)
         for lvl in LEVEL_ORDER:
@@ -256,9 +274,9 @@ def main() -> None:
 
     print_report(result)
 
-    json_path = out_dir / "caveman_evaluation_report.json"
-    csv_path = out_dir / "caveman_metrics_table.csv"
-    with open(json_path, "w") as f:
+    json_path = out_dir / "cavewoman_evaluation_report.json"
+    csv_path = out_dir / "cavewoman_metrics_table.csv"
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
     write_csv(result["per_level"], csv_path)
 

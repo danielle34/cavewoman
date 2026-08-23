@@ -5,7 +5,7 @@ runs each compressed prompt through GPT-4o with the same neutral
 input-condition system prompt the paper uses for Condition A.
 
 Outputs:
-    results/llmlingua/inference/gpt-4o/<dataset>/<dataset>_LLMLingua.jsonl
+    results/llmlingua/inference/gpt4o/<dataset>/<dataset>_LLMLingua.jsonl
 
 Resume-safe by idx. Supports sharding across tmux sessions:
     --shard 0 --num_shards 2   (tmux 1)
@@ -22,7 +22,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
-sys.path.insert(0, str(REPO / "scripts"))
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
 try:
     from dotenv import load_dotenv
@@ -33,7 +34,7 @@ except ImportError:
 from dataset_loader_multi import extract_answer, check_correct  # noqa: E402
 
 COMPRESSED_BASE = REPO / "results" / "llmlingua" / "compressed"
-OUT_BASE = REPO / "results" / "llmlingua" / "inference" / "gpt-4o"
+OUT_BASE = REPO / "results" / "llmlingua" / "inference" / "gpt4o"
 
 NEUTRAL_INPUT_SYSTEM_PROMPT = (
     "You are a helpful assistant. "
@@ -50,7 +51,7 @@ def read_completed(path: Path) -> set:
     if not path.exists():
         return set()
     done = set()
-    with path.open() as f:
+    with path.open(encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
@@ -65,7 +66,7 @@ def load_compressed(dataset: str) -> list:
     rows = []
     if not p.exists():
         return rows
-    with p.open() as f:
+    with p.open(encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
@@ -76,7 +77,7 @@ def load_compressed(dataset: str) -> list:
     return rows
 
 
-def call_gpt-4o(client, prompt: str, max_retries: int = 4):
+def call_gpt4o(client, prompt: str, max_retries: int = 4):
     last_err = None
     for attempt in range(max_retries + 1):
         try:
@@ -90,7 +91,7 @@ def call_gpt-4o(client, prompt: str, max_retries: int = 4):
                 temperature=0.0,
                 max_tokens=MAX_NEW_TOKENS,
             )
-            latency = time.time(), t0
+            latency = time.time() - t0
             return (
                 resp.choices[0].message.content or "",
                 int(resp.usage.prompt_tokens),
@@ -132,10 +133,10 @@ def run_one(dataset: str, client, shard: int, num_shards: int,
     spent = 0.0
     correct = 0
     n = 0
-    with out_path.open("a") as f:
+    with out_path.open("a", encoding="utf-8") as f:
         for rec in todo:
             prompt = rec["compressed_prompt"]
-            out_text, in_tok, out_tok, api_model, latency, err = call_gpt-4o(client, prompt)
+            out_text, in_tok, out_tok, api_model, latency, err = call_gpt4o(client, prompt)
             spent += cost(in_tok, out_tok)
             predicted = extract_answer(out_text, rec["answer_type"]) if out_text else None
             is_correct = check_correct(predicted, rec["gold_answer"], rec["answer_type"]) if predicted else False
@@ -144,7 +145,7 @@ def run_one(dataset: str, client, shard: int, num_shards: int,
                 "idx": rec["idx"],
                 "dataset": dataset,
                 "level": LEVEL_NAME,
-                "model_tag": "gpt-4o",
+                "model_tag": "gpt4o",
                 "api_model": api_model,
                 "system_prompt_kind": "neutral_input",
                 "compressed_prompt": prompt,
@@ -166,9 +167,9 @@ def run_one(dataset: str, client, shard: int, num_shards: int,
             f.flush()
             n += 1
             if n % 50 == 0 or n == 1:
-                elapsed = time.time(), t0
+                elapsed = time.time() - t0
                 rate = n / elapsed if elapsed > 0 else 0
-                eta = (len(todo), n) / rate if rate > 0 else 0
+                eta = (len(todo) - n) / rate if rate > 0 else 0
                 acc = correct / n if n else 0
                 print(f"  [{dataset}] n={n}/{len(todo)}  acc={acc:.3f}  "
                       f"spent=${spent:.2f}  rate={rate:.1f}/s  eta={eta/60:.1f}min",
@@ -207,7 +208,7 @@ def main() -> None:
             if not p.exists():
                 print(f"[{ds}] no compressed file yet, will retry", flush=True)
                 continue
-            n_now = sum(1 for _ in p.open())
+            n_now = sum(1 for _ in p.open(encoding="utf-8"))
             if n_now == seen_counts[ds]:
                 # No new compressed rows since last pass, skip cheap.
                 continue

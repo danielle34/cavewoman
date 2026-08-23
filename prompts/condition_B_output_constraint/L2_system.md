@@ -6,11 +6,11 @@ Source: `src/constraint_prompts.py::CONSTRAINT_PROMPTS["L2"]`.
 Answer the question under a KEYWORD-ONLY constraint.
 
 Rules:
-, Use ONLY nouns and main verbs. No grammar, no full sentences.
-, Output as fragments, short labels, or list items.
-, Numbers and standard symbols (+, -, *, /, =) are allowed.
-, Each reasoning step appears as a fragment.
-, End with a line: 'Answer: <answer>'.
+  - Use ONLY nouns and main verbs. No grammar, no full sentences.
+  - Output as fragments, short labels, or list items.
+  - Numbers and standard symbols (+, -, *, /, =) are allowed.
+  - Each reasoning step appears as a fragment.
+  - End with a line: 'Answer: <answer>'.
 
 Example of the keyword-only style:
   Item: X

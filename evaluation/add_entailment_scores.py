@@ -22,7 +22,7 @@ from typing import Dict, List
 
 from tqdm import tqdm
 
-_SCRIPTS_DIR = Path(__file__).resolve().parent / "scripts"
+_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "src"
 sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from entailment_scorer import load_nli_model, batch_score_entailment  # noqa: E402
@@ -35,7 +35,7 @@ def parse_args() -> argparse.Namespace:
         description="Add bidirectional NLI entailment-vs-L0 scores to CAVEWOMAN JSONL files."
     )
     p.add_argument("--results_dir", required=True, help="Directory holding caveman_*_L*.jsonl files")
-    p.add_argument("--model_name", required=True, help="Model tag in file names, e.g. 'qwen-2.5'")
+    p.add_argument("--model_name", required=True, help="Model tag in file names, e.g. 'qwen2.5'")
     p.add_argument("--dataset", required=True, help="Dataset tag in file names, e.g. 'gsm8k'")
     p.add_argument("--condition", choices=["output", "input"], default=None,
                    help="Condition tag in file names ('output' or 'input'). "
@@ -72,7 +72,7 @@ def _resolve_condition(results_dir: Path, model_name: str, dataset: str,
 
 def read_jsonl(path: Path) -> List[Dict]:
     rows: List[Dict] = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -120,7 +120,7 @@ def process_level(
 
     n_bi = n_a = n_b = 0
     sum_a_prob = 0.0
-    with open(out_path, "w") as fout:
+    with open(out_path, "w", encoding="utf-8") as fout:
         for r in records:
             idx = r.get("idx")
             new_rec = dict(r)
@@ -192,7 +192,7 @@ def sanity_check_l0_self(nli, l0_records, batch_size: int,
           f" mean entailment prob = {mean_prob:.4f}")
     if rate < 0.99:
         print(f"[sanity] WARNING: rate < 0.99, the NLI model fails to call identical strings entailing"
-              f" {len(res), n_ent} times. Inspect those records before trusting downstream stats.")
+              f" {len(res) - n_ent} times. Inspect those records before trusting downstream stats.")
     return {"n": len(res), "n_total": n_total, "sampled": n_total > sample_size,
             "entailment_rate": rate, "mean_entailment_prob": mean_prob}
 
@@ -227,11 +227,11 @@ def main() -> None:
         out_path = paths[lvl].with_name(paths[lvl].stem + "_with_entailment.jsonl")
         if out_path.exists():
             try:
-                with open(out_path) as f:
+                with open(out_path, encoding="utf-8") as f:
                     n = sum(1 for _ in f)
             except Exception:
                 n = 0
-            expected = sum(1 for _ in open(paths[lvl]))
+            expected = sum(1 for _ in open(paths[lvl], encoding="utf-8"))
             if n == expected:
                 print(f"[resume] {lvl}: already complete ({n}/{expected}) → skip")
                 continue

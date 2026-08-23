@@ -9,9 +9,9 @@ import argparse
 import json
 import logging
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -66,8 +66,13 @@ def load_config(path: Optional[str] = None) -> Config:
     p = Path(os.path.expanduser(str(p))).resolve()
     if not p.exists():
         raise FileNotFoundError(f"config not found: {p}")
-    raw = yaml.safe_load(p.read_text())
-    paths = {k: Path(os.path.expanduser(v)).resolve() for k, v in raw["paths"].items()}
+    raw = yaml.safe_load(p.read_text(encoding="utf-8"))
+    # Relative paths are taken relative to the config file, so the pipeline
+    # behaves the same no matter which directory it is invoked from.
+    def _anchor(v):
+        q = Path(os.path.expanduser(v))
+        return q.resolve() if q.is_absolute() else (p.parent / q).resolve()
+    paths = {k: _anchor(v) for k, v in raw["paths"].items()}
     return Config(
         raw=raw,
         paths=paths,
@@ -177,7 +182,7 @@ def discover_lanes(cfg: Config, logger: Optional[logging.Logger] = None
 def read_jsonl(path: Path) -> pd.DataFrame:
     """Read one JSONL file into a DataFrame (only used internally)."""
     rows: List[Dict[str, Any]] = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -273,9 +278,9 @@ def add_derived_columns(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
     """Add canonical derived columns to a long-form DataFrame.
 
     Adds (skipping any that already exist):
-    , semantic_collapse: bool, embedding_similarity < threshold
-    , total_tokens:      input_tokens + output_tokens
-    , cost_usd_safe:     float, NaN→0
+      - semantic_collapse: bool, embedding_similarity < threshold
+      - total_tokens:      input_tokens + output_tokens
+      - cost_usd_safe:     float, NaN→0
     """
     if df.empty:
         return df
@@ -312,8 +317,8 @@ def bootstrap_ci(values: Sequence[float], stat=np.mean,
     for i in range(n):
         boots[i] = stat(arr[idx[i]])
     point = float(stat(arr))
-    alpha = (1.0, ci) / 2.0
-    lo, hi = np.quantile(boots, [alpha, 1, alpha])
+    alpha = (1.0 - ci) / 2.0
+    lo, hi = np.quantile(boots, [alpha, 1 - alpha])
     return (point, float(lo), float(hi))
 
 
@@ -321,7 +326,7 @@ def paired_bootstrap_diff(a: Sequence[float], b: Sequence[float],
                           n: int = 2000, ci: float = 0.95,
                           rng: Optional[np.random.Generator] = None
                           ) -> Tuple[float, float, float]:
-    """Paired bootstrap on (a, b). Inputs must align by index.
+    """Paired bootstrap on (a - b). Inputs must align by index.
 
     Returns (mean_diff, lo, hi).
     """
@@ -332,13 +337,13 @@ def paired_bootstrap_diff(a: Sequence[float], b: Sequence[float],
     if arr_a.size == 0:
         return (float("nan"), float("nan"), float("nan"))
     rng = rng if rng is not None else np.random.default_rng()
-    diff = arr_a, arr_b
+    diff = arr_a - arr_b
     boots = np.empty(n, dtype=float)
     idx = rng.integers(0, diff.size, size=(n, diff.size))
     for i in range(n):
         boots[i] = diff[idx[i]].mean()
-    alpha = (1.0, ci) / 2.0
-    lo, hi = np.quantile(boots, [alpha, 1, alpha])
+    alpha = (1.0 - ci) / 2.0
+    lo, hi = np.quantile(boots, [alpha, 1 - alpha])
     return (float(diff.mean()), float(lo), float(hi))
 
 
@@ -348,12 +353,12 @@ def cohens_d(a: Sequence[float], b: Sequence[float]) -> float:
     arr_b = np.asarray(b, dtype=float); arr_b = arr_b[~np.isnan(arr_b)]
     if arr_a.size < 2 or arr_b.size < 2:
         return float("nan")
-    pooled = np.sqrt(((arr_a.var(ddof=1) * (arr_a.size, 1))
-                      + (arr_b.var(ddof=1) * (arr_b.size, 1)))
-                     / (arr_a.size + arr_b.size, 2))
+    pooled = np.sqrt(((arr_a.var(ddof=1) * (arr_a.size - 1))
+                      + (arr_b.var(ddof=1) * (arr_b.size - 1)))
+                     / (arr_a.size + arr_b.size - 2))
     if pooled == 0:
         return float("nan")
-    return float((arr_a.mean(), arr_b.mean()) / pooled)
+    return float((arr_a.mean() - arr_b.mean()) / pooled)
 
 
 def holm_bonferroni(pvalues: Sequence[float]) -> np.ndarray:
@@ -364,7 +369,7 @@ def holm_bonferroni(pvalues: Sequence[float]) -> np.ndarray:
     adj = np.empty(m, dtype=float)
     running_max = 0.0
     for rank, idx in enumerate(order):
-        v = p[idx] * (m, rank)
+        v = p[idx] * (m - rank)
         running_max = max(running_max, v)
         adj[idx] = min(1.0, running_max)
     return adj
@@ -377,7 +382,7 @@ def benjamini_hochberg(pvalues: Sequence[float]) -> np.ndarray:
     order = np.argsort(p)
     adj = np.empty(m, dtype=float)
     running_min = 1.0
-    for rank in range(m, 1, -1, -1):
+    for rank in range(m - 1, -1, -1):
         idx = order[rank]
         v = p[idx] * m / (rank + 1)
         running_min = min(running_min, v)
@@ -406,7 +411,7 @@ def write_csv(df: pd.DataFrame, path: Path, logger: Optional[logging.Logger] = N
 
 def write_json(obj: Any, path: Path, logger: Optional[logging.Logger] = None) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, default=str)
     if logger:
         logger.info(f"wrote {path}")
@@ -426,7 +431,7 @@ def write_latex(df: pd.DataFrame, path: Path,
     except Exception:
         # very old pandas, fall back without caption/label
         body = df.to_latex(index=False, float_format=float_format, escape=True)
-    path.write_text(body)
+    path.write_text(body, encoding="utf-8")
     if logger:
         logger.info(f"wrote {path}")
     return path

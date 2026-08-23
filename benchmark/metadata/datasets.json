@@ -6,45 +6,81 @@
       "hf_id": "openai/gsm8k",
       "hf_subset": "main",
       "split": "test",
-      "answer_type": "number",
+      "answer_type": "numeric",
       "license": "MIT",
-      "citation": "Cobbe et al. 2021"
+      "citation": "Cobbe et al. 2021",
+      "panel": "main"
     },
     {
       "tag": "boolq",
       "hf_id": "google/boolq",
       "hf_subset": null,
       "split": "validation",
-      "answer_type": "yes_no",
+      "answer_type": "boolean",
       "license": "CC-BY-SA-3.0",
-      "citation": "Clark et al. 2019"
+      "citation": "Clark et al. 2019",
+      "panel": "main"
     },
     {
       "tag": "arc_easy",
       "hf_id": "allenai/ai2_arc",
       "hf_subset": "ARC-Easy",
       "split": "test",
-      "answer_type": "mc_letter",
+      "answer_type": "multiple_choice",
       "license": "CC-BY-SA-4.0",
-      "citation": "Clark et al. 2018"
+      "citation": "Clark et al. 2018",
+      "panel": "main"
     },
     {
       "tag": "commonsenseqa",
       "hf_id": "tau/commonsense_qa",
       "hf_subset": null,
       "split": "validation",
-      "answer_type": "mc_letter",
+      "answer_type": "multiple_choice",
       "license": "MIT",
-      "citation": "Talmor et al. 2019"
+      "citation": "Talmor et al. 2019",
+      "panel": "main"
     },
     {
       "tag": "mmlu_stem",
       "hf_id": "cais/mmlu",
-      "hf_subset": "STEM subjects (see benchmark/datasets/per_dataset/mmlu_stem.md)",
+      "hf_subset": "STEM subjects",
       "split": "test",
-      "answer_type": "mc_letter",
+      "answer_type": "multiple_choice",
       "license": "MIT",
-      "citation": "Hendrycks et al. 2020"
+      "citation": "Hendrycks et al. 2020",
+      "notes": "Union of the STEM subject configs; see benchmark/README.md.",
+      "panel": "main"
+    },
+    {
+      "tag": "mgsm",
+      "hf_id": "juletxara/mgsm",
+      "hf_subset": "one config per language: bn de en es fr ja ru sw te th zh",
+      "split": "test",
+      "answer_type": "numeric",
+      "license": "CC-BY-SA-4.0",
+      "citation": "Shi et al. 2022",
+      "panel": "multilingual"
+    },
+    {
+      "tag": "xsum",
+      "hf_id": "EdinburghNLP/xsum",
+      "hf_subset": null,
+      "split": "test",
+      "answer_type": "summary",
+      "license": "CC-BY-SA-4.0",
+      "citation": "Narayan et al. 2018",
+      "panel": "longform"
+    },
+    {
+      "tag": "cnndm",
+      "hf_id": "abisee/cnn_dailymail",
+      "hf_subset": "3.0.0",
+      "split": "test",
+      "answer_type": "summary",
+      "license": "Apache-2.0",
+      "citation": "See et al. 2017",
+      "panel": "longform"
     }
   ]
 }

@@ -6,8 +6,8 @@ answer-extraction / correctness logic, same per-record schema PLUS two new
 fields (`cost_usd`, `api_model`).
 
 Loads API keys from a `.env` file at the repository root via python-dotenv:
-, OPENAI_API_KEY    (needed for any `gpt-*` model)
-, ANTHROPIC_API_KEY (needed for any `claude-*` model)
+  - OPENAI_API_KEY    (needed for any `gpt-*` model)
+  - ANTHROPIC_API_KEY (needed for any `claude-*` model)
 
 CLI:
     python experiments/run_experiment_api.py \\
@@ -45,7 +45,7 @@ from constraint_prompts import (  # noqa: E402
     get_max_tokens,
 )
 from dataset_loader_multi import (  # noqa: E402
-    load_dataset_caveman,
+    load_dataset_cavewoman,
     extract_answer,
     check_correct,
     compress_input,
@@ -73,14 +73,14 @@ NEUTRAL_INPUT_SYSTEM_PROMPT = (
 MODEL_REGISTRY: Dict[str, Dict] = {
     "gpt-4o": {
         "provider": "openai",
-        "tag": "gpt-4o",
+        "tag": "gpt4o",
         "api_model": "gpt-4o",
         "price_in_per_1m": 2.50,
         "price_out_per_1m": 10.00,
     },
     "gpt-5.4-2026-03-05": {
         "provider": "openai",
-        "tag": "gpt-5.4",
+        "tag": "gpt5.4",
         "api_model": "gpt-5.4-2026-03-05",
         # Placeholder pricing until OpenAI publishes official rates; update
         # when the model's pricing page is live.
@@ -89,14 +89,14 @@ MODEL_REGISTRY: Dict[str, Dict] = {
     },
     "claude-haiku-4-5": {
         "provider": "anthropic",
-        "tag": "haiku-4.5",
+        "tag": "haiku",
         "api_model": "claude-haiku-4-5-20251001",
         "price_in_per_1m": 1.00,
         "price_out_per_1m": 5.00,
     },
     "claude-sonnet-4-6": {
         "provider": "anthropic",
-        "tag": "sonnet-4.6",
+        "tag": "sonnet",
         # Alias; Anthropic resolves to the current dated version and returns
         # it as resp.model, that exact string lands in the `api_model` field
         # of every JSONL record for reproducibility.
@@ -109,7 +109,7 @@ MODEL_REGISTRY: Dict[str, Dict] = {
         # but are not returned in message.content. The L0 budget is bumped to
         # 1200 for Kimi only; L1-L4 keep the standard compression budgets.
         "provider": "azure_openai",
-        "tag": "kimi-k2.6",
+        "tag": "kimi",
         # For Azure deployments `api_model` is the deployment name configured
         # in your Azure portal; the SDK uses that string as the `model` kwarg.
         "api_model": "Kimi-K2.6",
@@ -192,7 +192,7 @@ def _read_completed_idx(path: Path) -> Set[int]:
     if not path.exists():
         return set()
     done: Set[int] = set()
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -223,8 +223,8 @@ def call_with_retry(
     """Returns (output_text, input_tokens, output_tokens, api_model_returned, latency_s).
 
     Branches on `provider`:
-    , "openai"    -> client.chat.completions.create(...)
-    , "anthropic" -> client.messages.create(...)
+      - "openai"    -> client.chat.completions.create(...)
+      - "anthropic" -> client.messages.create(...)
     """
     if dry_run:
         placeholder = f"[DRY RUN, provider={provider} model={api_model}]\nAnswer: <placeholder>"
@@ -264,7 +264,7 @@ def call_with_retry(
                     kwargs["max_tokens"] = max_tokens
                     kwargs["temperature"] = 0.0
                 resp = client.chat.completions.create(**kwargs)
-                latency_s = time.time(), t0
+                latency_s = time.time() - t0
                 text = resp.choices[0].message.content or ""
                 return (
                     text,
@@ -281,7 +281,7 @@ def call_with_retry(
                     messages=[{"role": "user", "content": user_message}],
                     temperature=0.0,
                 )
-                latency_s = time.time(), t0
+                latency_s = time.time() - t0
                 # `resp.content` is a list of content blocks. For text-only,
                 # the first block's .text is what we want.
                 text_parts = []
@@ -352,14 +352,12 @@ def run_one_level(args, client, level: str, items: List[Dict], model_config: Dic
     else:
         system_prompt = CONSTRAINT_PROMPTS[level]
     max_new = get_max_tokens(level)
-    # Kimi-K2.6 emits hidden reasoning tokens that count against max_tokens
-    # (see KIMI_STATUS.md). At L0 the 400-token default is exhausted by
-    # thinking before the visible "Answer: X" line is emitted; budget probe
-    # (2026-05-25) showed 1200 gives 5/5 pass rate at avg ~590 actual tokens
-    # used. L1-L4 keep the original CAVEWOMAN compression budgets, Kimi will
-    # often fail extraction at those levels, which is a finding (reasoning
-    # models cannot satisfy strict output-token compression), not a bug.
-    if model_tag == "kimi-k2.6" and level == "L0":
+    # Kimi-K2.6 emits hidden reasoning tokens that count against max_tokens, so
+    # the 400-token L0 default is exhausted before the visible "Answer:" line.
+    # L0 gets 1200; L1-L4 keep the standard compression budgets. Kimi often
+    # fails extraction at those levels, which is the result, not a defect:
+    # reasoning models cannot satisfy strict output-token compression.
+    if model_tag == "kimi" and level == "L0":
         max_new = max(max_new, 1200)
 
     stats = {
@@ -373,7 +371,7 @@ def run_one_level(args, client, level: str, items: List[Dict], model_config: Dic
     }
     t_start = time.time()
 
-    with open(out_path, "a") as fout:
+    with open(out_path, "a", encoding="utf-8") as fout:
         for i, item in enumerate(todo, start=1):
             user_message = (
                 compress_input(item["question_formatted"], level)
@@ -453,11 +451,11 @@ def run_one_level(args, client, level: str, items: List[Dict], model_config: Dic
 
             if i % 100 == 0 and stats["n_processed"] > 0:
                 done = stats["n_processed"]
-                remain = len(todo), done
+                remain = len(todo) - done
                 cost_so_far = stats["total_cost_usd"]
                 est_total = cost_so_far / done * len(todo) if done else 0.0
-                est_remain = max(est_total, cost_so_far, 0.0)
-                elapsed = time.time(), t_start
+                est_remain = max(est_total - cost_so_far, 0.0)
+                elapsed = time.time() - t_start
                 rate = done / elapsed if elapsed > 0 else 0.0
                 print(
                     f"[{level}] {done}/{len(todo)}  remain={remain}  "
@@ -507,7 +505,7 @@ def main() -> None:
             client = Anthropic(api_key=key)
         elif provider == "azure_openai":
             # Per-model Azure key and endpoint: env var names are derived from
-            # the model tag, e.g. tag="kimi-k2.6" → AZURE_KIMI_API_KEY +
+            # the model tag, e.g. tag="kimi" -> AZURE_KIMI_API_KEY +
             # AZURE_KIMI_ENDPOINT. Keeps multiple Azure deployments isolated.
             tag_upper = config["tag"].upper()
             key_var = f"AZURE_{tag_upper}_API_KEY"
@@ -533,7 +531,7 @@ def main() -> None:
     # Dataset
     split = _DATASET_CANONICAL_SPLIT[args.dataset]
     print(f"[load] dataset={args.dataset}  split={split}  seed={args.seed}", flush=True)
-    items = load_dataset_caveman(name=args.dataset, split=split, n=None, seed=args.seed)
+    items = load_dataset_cavewoman(name=args.dataset, split=split, n=None, seed=args.seed)
     print(f"[load] {len(items)} items in full split", flush=True)
 
     # Chunk filter
@@ -578,7 +576,7 @@ def main() -> None:
         ),
         "started_at": datetime.now(timezone.utc).isoformat(),
     }
-    with open(config_path, "w") as f:
+    with open(config_path, "w", encoding="utf-8") as f:
         json.dump(config_dump, f, indent=2)
     print(f"[config] wrote {config_path}", flush=True)
 
@@ -595,8 +593,8 @@ def main() -> None:
     config_dump["cost_per_level_usd"] = cost_per_level
     config_dump["total_cost_usd"] = round(sum(cost_per_level.values()), 8)
     config_dump["finished_at"] = datetime.now(timezone.utc).isoformat()
-    config_dump["wall_time_s"] = round(time.time(), overall_start, 2)
-    with open(config_path, "w") as f:
+    config_dump["wall_time_s"] = round(time.time() - overall_start, 2)
+    with open(config_path, "w", encoding="utf-8") as f:
         json.dump(config_dump, f, indent=2)
 
     # Final summary

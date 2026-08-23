@@ -1,11 +1,11 @@
 """Step 1, compute matched LLMLingua compression ratios from existing data.
 
-For each (model, dataset) in {gpt-4o, qwen-2.5} × {gsm8k, boolq, arc_easy},
+For each (model, dataset) in {gpt4o, qwen2.5} × {gsm8k, boolq, arc_easy},
 read the Condition-A (condition='input') L0, L1, L2 JSONL outputs and compute
 the mean input_tokens at each level. Then derive the L1 and L2 token-retention
 ratio τ = mean(input_tokens_Lx) / mean(input_tokens_L0). These τ values are
 what we pass to LLMLingua-2's compress_prompt(rate=τ) so that LLMLingua's
-token reduction matches caveman's POS-filter token reduction.
+token reduction matches CAVEWOMAN's POS-filter token reduction.
 
 Outputs:
   results/llmlingua/target_compression_ratios.csv  (per cell)
@@ -26,7 +26,7 @@ RESULTS_DIR = REPO / "results"
 OUT_DIR = REPO / "results" / "llmlingua"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-MODELS = ["gpt-4o", "qwen-2.5"]
+MODELS = ["gpt4o", "qwen2.5"]
 DATASETS = ["gsm8k", "boolq", "arc_easy"]
 LEVELS = ["L0", "L1", "L2"]
 CONDITION = "input"  # paper's Condition A
@@ -41,9 +41,13 @@ def read_input_tokens(model: str, dataset: str, level: str) -> list[int]:
         / f"caveman_{model}_{dataset}_{CONDITION}_{level}.jsonl"
     )
     if not path.exists():
-        raise FileNotFoundError(f"Missing baseline file: {path}")
+        raise SystemExit(
+            f"missing baseline file:\n  {path}\n\n"
+            "This step reads the main-panel Condition A generations. Unpack the\n"
+            "data bundle into results/, or run experiments/ first."
+        )
     tokens = []
-    with path.open() as f:
+    with path.open(encoding="utf-8") as f:
         for line in f:
             rec = json.loads(line)
             tokens.append(int(rec["input_tokens"]))
@@ -91,7 +95,7 @@ def main() -> None:
         ),
     }
     out_json = OUT_DIR / "compression_targets.json"
-    out_json.write_text(json.dumps(targets, indent=2))
+    out_json.write_text(json.dumps(targets, indent=2), encoding="utf-8")
     print()
     print(f"Wrote {out_json}")
     print(json.dumps(targets, indent=2))

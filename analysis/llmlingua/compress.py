@@ -3,7 +3,7 @@
 Design: LLMLingua is its own SINGLE compression level (named "LLMLingua"),
 not split into matched L1/L2 ratios. The compressed prompts are what we
 feed to the downstream LLMs as if LLMLingua were just another constraint
-level peer to caveman's L0..L4.
+level peer to CAVEWOMAN's L0..L4.
 
 Notes on the rate parameter (verified against the LLMLingua-2 paper, Sec. 4.2):
     `rate` passed to PromptCompressor.compress_prompt is τ = fraction KEPT
@@ -31,12 +31,13 @@ import signal
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "scripts"))
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
-from dataset_loader_multi import load_dataset_caveman  # noqa: E402
+from dataset_loader_multi import load_dataset_cavewoman  # noqa: E402
 
 OUT_BASE = REPO / "results" / "llmlingua" / "compressed"
 
@@ -84,7 +85,7 @@ def read_existing_ids(path: Path) -> set:
     if not path.exists():
         return set()
     done = set()
-    with path.open() as f:
+    with path.open(encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
@@ -106,7 +107,7 @@ def compress_one(compressor, text: str, target_tau: float) -> Dict:
 
 def process_dataset(dataset: str, compressor, target_tau: float,
                      limit: Optional[int], tau_tag: Optional[str]) -> None:
-    items = load_dataset_caveman(dataset)
+    items = load_dataset_cavewoman(dataset)
     if limit:
         items = items[:limit]
     level_name, filename_tmpl = _level_and_filename(tau_tag)
@@ -119,7 +120,7 @@ def process_dataset(dataset: str, compressor, target_tau: float,
 
     t_start = time.time()
     written = 0
-    with out_path.open("a") as f:
+    with out_path.open("a", encoding="utf-8") as f:
         for it in items:
             if _STOP["flag"]:
                 print(f"[{dataset}] stopping early due to signal", flush=True)
@@ -164,7 +165,7 @@ def process_dataset(dataset: str, compressor, target_tau: float,
             f.flush()
             written += 1
             if written % 200 == 0:
-                elapsed = time.time(), t_start
+                elapsed = time.time() - t_start
                 rate = written / elapsed if elapsed > 0 else 0
                 print(f"  [{dataset}] written={written}  rate={rate:.1f}/s  elapsed={elapsed:.0f}s",
                       flush=True)

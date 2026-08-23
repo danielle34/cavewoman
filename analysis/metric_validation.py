@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
 from typing import Any, Dict, List
 
 import numpy as np
@@ -33,8 +32,8 @@ def cohen_kappa(a: np.ndarray, b: np.ndarray) -> float:
         return float("nan")
     po = float((a == b).mean())
     pa = a.mean(); pb = b.mean()
-    pe = pa * pb + (1, pa) * (1, pb)
-    return float((po, pe) / (1, pe)) if pe < 1 else float("nan")
+    pe = pa * pb + (1 - pa) * (1 - pb)
+    return float((po - pe) / (1 - pe)) if pe < 1 else float("nan")
 
 
 def parse_args() -> argparse.Namespace:

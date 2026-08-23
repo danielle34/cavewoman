@@ -25,7 +25,7 @@ NUM_LAYERS = 17                       # default for roberta-large in bert_score
 
 RESULTS = Path("../../results")
 LLM_DIR = RESULTS / "llmlingua" / "inference"
-LL_MODELS = ["gpt-4o", "sonnet-4.6", "qwen-2.5"]
+LL_MODELS = ["gpt4o", "sonnet", "qwen2.5"]
 LL_DATASETS = ["gsm8k", "boolq", "arc_easy"]
 
 OUT_PER_CELL = RESULTS / "llmlingua" / "bertscore_per_cell.csv"
@@ -38,7 +38,7 @@ def load_pairs_from_scored(path: Path) -> list[tuple[str, str]]:
     Skips rows with missing fields or empty strings. Used for LLMLingua
     scored files (τ=0.5 and τ=0.8)."""
     pairs = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -55,7 +55,7 @@ def load_pairs_from_scored(path: Path) -> list[tuple[str, str]]:
     return pairs
 
 
-def load_caveman_pairs(model: str, dataset: str, level: str) -> list[tuple[str, str]]:
+def load_cavewoman_pairs(model: str, dataset: str, level: str) -> list[tuple[str, str]]:
     """Cavewoman L1/L2 input-channel pairs. We pull L0 outputs and Lx outputs
     from the per-item entailment JSONLs (which include both side-by-side)."""
     run_dir = RESULTS / f"{model}_input" / dataset
@@ -65,7 +65,7 @@ def load_caveman_pairs(model: str, dataset: str, level: str) -> list[tuple[str, 
         return []
     # Index L0 by item id.
     l0_idx = {}
-    with open(l0_path) as f:
+    with open(l0_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -76,7 +76,7 @@ def load_caveman_pairs(model: str, dataset: str, level: str) -> list[tuple[str, 
                 continue
             l0_idx[r.get("idx", r.get("id"))] = (r.get("output") or "").strip()
     pairs = []
-    with open(lx_path) as f:
+    with open(lx_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -136,14 +136,14 @@ def main():
 
     # ---- LLMLingua τ=0.8: Qwen only, 3 datasets
     for ds in LL_DATASETS:
-        p = LLM_DIR / "qwen-2.5" / ds / f"{ds}_LLMLingua_t0.8_scored.jsonl"
+        p = LLM_DIR / "qwen2.5" / ds / f"{ds}_LLMLingua_t0.8_scored.jsonl"
         if not p.exists():
             print(f"  [skip] {p} missing")
             continue
         pairs = subsample(load_pairs_from_scored(p), SUBSAMPLE, SEED)
-        print(f"  scoring LLMLingua τ=0.8 / qwen-2.5 / {ds} … n={len(pairs)}")
+        print(f"  scoring LLMLingua tau=0.8 / qwen2.5 / {ds} … n={len(pairs)}")
         f1 = score_pairs(pairs)
-        rows.append(dict(method="LLMLingua (τ=0.8)", model="qwen-2.5", dataset=ds,
+        rows.append(dict(method="LLMLingua (τ=0.8)", model="qwen2.5", dataset=ds,
                          n=len(pairs), bertscore_f1=f1))
 
     # ---- Cavewoman L1 and L2 Cond A on the same 3x3
@@ -151,10 +151,10 @@ def main():
                           ("Cavewoman (POS filter)", "L2")]:
         for model in LL_MODELS:
             for ds in LL_DATASETS:
-                pairs = subsample(load_caveman_pairs(model, ds, level),
+                pairs = subsample(load_cavewoman_pairs(model, ds, level),
                                   SUBSAMPLE, SEED)
                 if not pairs:
-                    print(f"  [skip] caveman {model}/{ds}/{level}")
+                    print(f"  [skip] cavewoman {model}/{ds}/{level}")
                     continue
                 print(f"  scoring Cavewoman {level}-A / {model} / {ds} … "
                       f"n={len(pairs)}")

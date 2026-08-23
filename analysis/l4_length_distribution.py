@@ -24,11 +24,20 @@ import statistics
 from pathlib import Path
 from typing import Dict, List
 
-REPO = Path(__file__).resolve().parents[2]
-OUT_DIR = REPO / "results" / "audits"
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO = _REPO_ROOT
+import sys as _sys
+_sys.path.insert(0, str(_REPO_ROOT / "src"))
+from release_paths import results_root  # noqa: E402
+_RESULTS = results_root(_REPO_ROOT / "results")
+
+OUT_DIR = _RESULTS / "audits"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-MODELS = ["qwen-2.5", "qwen-3.5", "deepseek-r1", "gemma-4", "gpt-4o", "gpt-5.4", "haiku-4.5", "sonnet-4.6"]
+# All nine models. Kimi-K2.6 is included: its token consumption sits at the
+# per-level cap, which is what this script measures.
+MODELS = ["qwen2.5", "qwen3.5", "deepseek", "gemma4", "gpt4o", "gpt5.4", "haiku", "sonnet",
+          "kimi"]
 DATASETS = ["gsm8k", "boolq", "arc_easy", "commonsenseqa", "mmlu_stem"]
 CONDITIONS = ["input", "output"]
 
@@ -37,11 +46,11 @@ BUDGET_B = 20
 
 
 def collect_l4(model: str, dataset: str, cond: str) -> List[int]:
-    p = REPO / "results" / f"{model}_{cond}" / dataset / f"caveman_{model}_{dataset}_{cond}_L4.jsonl"
+    p = _RESULTS / f"{model}_{cond}" / dataset / f"caveman_{model}_{dataset}_{cond}_L4.jsonl"
     if not p.exists():
         return []
     out = []
-    with p.open() as f:
+    with p.open(encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -58,7 +67,7 @@ def summarize(toks: List[int], budget: int) -> Dict:
         return {"n": 0, "mean": None, "median": None, "p95": None, "max": None, "violation_rate": None, "mean_overshoot": None}
     n = len(toks)
     sorted_t = sorted(toks)
-    p95 = sorted_t[int(0.95 * (n, 1))]
+    p95 = sorted_t[int(0.95 * (n - 1))]
     over = [t for t in toks if t > budget]
     return {
         "n": n,
@@ -93,7 +102,7 @@ def main():
                           f"violation_rate={stats['violation_rate']:.3f}")
 
     out_csv = OUT_DIR / "l4_length_distribution.csv"
-    with out_csv.open("w", newline="") as f:
+    with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["model", "dataset", "condition", "budget", "n", "mean", "median", "p95", "max", "violation_rate", "mean_overshoot"])
         w.writeheader()
         for r in rows:
@@ -121,7 +130,7 @@ def main():
         "L4_input (budget=15, soft)": grand(a_rows),
         "L4_output (budget=20, soft via prompt)": grand(b_rows),
     }
-    (OUT_DIR / "l4_summary.json").write_text(json.dumps(summary, indent=2, default=str))
+    (OUT_DIR / "l4_summary.json").write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
     print("\n=== L4 grand ===")
     print(json.dumps(summary, indent=2, default=str))
 

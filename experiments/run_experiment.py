@@ -22,10 +22,6 @@ from constraint_prompts import (  # noqa: E402
     LEVEL_ORDER,
     get_max_tokens,
 )
-from dataset_loader import (  # noqa: E402
-    load_gsm8k,
-    check_answer_correct,
-)
 from metrics_utils import (  # noqa: E402
     extract_numeric_answer,
     count_semantic_units,
@@ -37,7 +33,7 @@ from model_loader import (  # noqa: E402
     run_inference,
 )
 from dataset_loader_multi import (  # noqa: E402
-    load_dataset_caveman,
+    load_dataset_cavewoman,
     extract_answer,
     check_correct,
     compress_input,
@@ -253,7 +249,9 @@ def parse_args():
         "--model_name",
         required=True,
         help="Tag used in JSONL filenames and the config. Use the HuggingFace "
-             "release naming, e.g. qwen-2.5, qwen-3.5, deepseek-r1, gemma-4.",
+             "This becomes the result-tree tag: it names the output directory "
+             "and appears in every filename, so downstream analysis matches "
+             "on it. Use qwen2.5, qwen3.5, deepseek, gemma4.",
     )
     p.add_argument(
         "--model_path",
@@ -316,7 +314,30 @@ def parse_args():
         default="",
         help="Suffix appended to output JSONL stem, e.g. '_paired' produces caveman_<model>_<ds>_<cond>_L0_paired.jsonl. Empty by default (no suffix).",
     )
+    p.add_argument(
+        "--enable_thinking",
+        action="store_true",
+        help="Force the chat template's thinking branch on. Passing neither "
+             "flag leaves it undefined, which for Qwen3 models is also ON.",
+    )
+    p.add_argument(
+        "--disable_thinking",
+        action="store_true",
+        help="Suppress the chat template's reasoning block. Use this on "
+             "Qwen3-family models.",
+    )
     return p.parse_args()
+
+
+def _thinking_flag(args):
+    """True / False / None (leave the template untouched)."""
+    if args.enable_thinking and args.disable_thinking:
+        raise SystemExit("--enable_thinking and --disable_thinking are mutually exclusive")
+    if args.enable_thinking:
+        return True
+    if args.disable_thinking:
+        return False
+    return None
 
 
 # ---------- jsonl helpers ----------
@@ -326,7 +347,7 @@ def _read_completed_idx(path: Path) -> Set[int]:
     if not path.exists():
         return set()
     done: Set[int] = set()
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -345,7 +366,7 @@ def _read_records(path: Path) -> List[Dict]:
     if not path.exists():
         return []
     out: List[Dict] = []
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -394,7 +415,7 @@ def run_level(
 
     correct_count = 0
     processed = 0
-    with open(out_path, "a") as fout:
+    with open(out_path, "a", encoding="utf-8") as fout:
         for item in todo:
             # Choose user message per condition.
             if args.condition == "input":
@@ -417,6 +438,7 @@ def run_level(
                     user_message=user_message,
                     max_new_tokens=max_new,
                     temperature=args.temperature,
+                    enable_thinking=_thinking_flag(args),
                 )
 
             answer_type = item.get("answer_type", "numeric")
@@ -544,7 +566,7 @@ def main() -> None:
     # config under a distinct filename so the canonical run's outputs are not
     # clobbered.
     config_path = out_dir / f"run_config{args.paired_suffix}.json"
-    with open(config_path, "w") as f:
+    with open(config_path, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2)
     print(f"[run] config -> {config_path}")
 
@@ -559,7 +581,7 @@ def main() -> None:
     effective_split = canonical_split if args.split == "test" and canonical_split != "test" else args.split
 
     print(f"[run] Loading dataset={args.dataset} split={effective_split} n={args.n} seed={args.seed}")
-    items = load_dataset_caveman(
+    items = load_dataset_cavewoman(
         name=args.dataset,
         split=effective_split,
         n=args.n,
@@ -617,9 +639,9 @@ def main() -> None:
         "config": config,
         "per_level": per_level_summary,
         "finished_at": datetime.now(timezone.utc).isoformat(),
-        "wall_time_s": round(time.time(), overall_start, 2),
+        "wall_time_s": round(time.time() - overall_start, 2),
     }
-    with open(summary_path, "w") as f:
+    with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
     print(f"\n[run] summary -> {summary_path}")
     print_summary_table(per_level_summary)

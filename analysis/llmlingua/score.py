@@ -19,17 +19,18 @@ from typing import Dict, List
 import numpy as np
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "scripts"))
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
 from entailment_scorer import load_nli_model, batch_score_entailment  # noqa: E402
 
 INF_BASE = REPO / "results" / "llmlingua" / "inference"
 BASELINE_BASE = REPO / "results"
 
-MODELS = ["gpt-4o", "sonnet-4.6", "qwen-2.5"]
+MODELS = ["gpt4o", "sonnet", "qwen2.5"]
 DATASETS = ["gsm8k", "boolq", "arc_easy"]
 # Levels we score. Primary LLMLingua run is τ=0.5 across all 3 models.
-# Rate-sensitivity run (LLMLingua_t0.8) only exists for qwen-2.5, score_one
+# Rate-sensitivity run (LLMLingua_t0.8) only exists for qwen2.5, score_one
 # silently skips (model, dataset, level) cells whose inference file is missing.
 LEVELS = ["LLMLingua", "LLMLingua_t0.8"]
 
@@ -47,7 +48,7 @@ def load_baseline_l0(model_tag: str, dataset: str) -> Dict[int, str]:
         # caller skips this cell.
         return {}
     out = {}
-    with candidate.open() as f:
+    with candidate.open(encoding="utf-8") as f:
         for line in f:
             rec = json.loads(line)
             out[int(rec["idx"])] = rec.get("output", "") or ""
@@ -59,7 +60,7 @@ def load_inference(model_tag: str, dataset: str, level: str) -> List[Dict]:
     rows = []
     if not p.exists():
         return rows
-    with p.open() as f:
+    with p.open(encoding="utf-8") as f:
         for line in f:
             try:
                 rows.append(json.loads(line))
@@ -117,7 +118,7 @@ def score_one(model_tag: str, dataset: str, level: str, nli, cosine_model) -> No
     print(f"  NLI both directions done in {time.time()-t1:.1f}s", flush=True)
 
     out_path = INF_BASE / model_tag / dataset / f"{dataset}_{level}_scored.jsonl"
-    with out_path.open("w") as f:
+    with out_path.open("w", encoding="utf-8") as f:
         for (r, _, l0), cos_s, fwd, bwd in zip(paired, cosine_scores, fwd_out, bwd_out):
             new_rec = dict(r)
             new_rec["l0_output"] = l0

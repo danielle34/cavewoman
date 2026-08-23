@@ -12,7 +12,7 @@
 #   --cpus-per-task, --mem : tune to your node specs. 48G memory is enough
 #                   for a 7-9B model loaded in bfloat16 on a single GPU.
 #
-# Submit:   sbatch submit_caveman.sh
+# Submit:   sbatch submit_cavewoman.sh
 # Monitor:  squeue -u $USER    (or: tail -f results/job_log.csv)
 #
 #SBATCH --job-name=cavewoman_sweep
@@ -123,7 +123,7 @@ if [ -f "$OUT_DIR/accuracy_summary.json" ]; then
     rm -f "$ACTIVE_FILE"
     echo "[chain] Run complete after $CHAIN_NUM chain(s). Cleared .active_run."
 elif [ "$CHAIN_NUM" -lt "$MAX_CHAINS" ]; then
-    NEXT_JOB=$(sbatch --parsable "$REPO_ROOT/submit_caveman.sh" 2>&1 || echo "SUBMIT_FAILED")
+    NEXT_JOB=$(sbatch --parsable "$REPO_ROOT/submit_cavewoman.sh" 2>&1 || echo "SUBMIT_FAILED")
     log_event "resubmit" "" "" "" "next_job_id=$NEXT_JOB chain=$((CHAIN_NUM+1))/$MAX_CHAINS"
     echo "[chain] Run incomplete; resubmitted as job $NEXT_JOB"
 else

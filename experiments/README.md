@@ -19,14 +19,35 @@ answer extraction, lives in [`../src/`](../src/) and is imported via a
 
 The four open-weight models in the paper use these HuggingFace IDs:
 
-| Tag | HuggingFace ID |
+| Tag (`--model_name`) | HuggingFace ID |
 |---|---|
-| `qwen-2.5` | `Qwen/Qwen2.5-VL-7B-Instruct` |
-| `qwen-3.5` | `Qwen/Qwen3.5-9B-Instruct` |
-| `deepseek-r1` | `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B` |
-| `gemma-4` | `google/gemma-4-e4b-it` |
+| `qwen2.5` | `Qwen/Qwen2.5-VL-7B-Instruct` |
+| `qwen3.5` | `Qwen/Qwen3.5-9B-Instruct` |
+| `deepseek` | `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B` |
+| `gemma4` | `google/gemma-4-e4b-it` |
+
+The tag is the result-tree identifier: it becomes the output directory name and
+appears in every generated filename, and the analysis scripts match on it. Use
+these exact strings, not the display names from the paper.
 
 Point `run_experiment.py` at a local snapshot of any of these with
 `--model_path /path/to/local/weights`. The decoder budget is
 `max_new_tokens = {400, 300, 200, 150, 20}` for L0..L4, applied
 identically across both channels.
+
+## Extension runners
+
+| Directory | Experiment |
+|---|---|
+| [`multilingual/`](multilingual/) | MGSM across ten non-English languages plus English. |
+| [`longform/`](longform/) | XSum and CNN/DailyMail summarization, Condition B only. |
+| [`size_sweep/`](size_sweep/) | Within-family scale ladder and the thinking-mode contrast. |
+
+## Qwen3-family thinking mode
+
+Pass `--disable_thinking` on any Qwen3-family model. The template emits a
+reasoning block unless `enable_thinking` is explicitly `False`, and that
+reasoning consumes the decoder budget before an answer is written.
+
+`--enable_thinking` forces it on (the contrast arm). Passing neither leaves the
+template untouched, which for Qwen3 also means on.

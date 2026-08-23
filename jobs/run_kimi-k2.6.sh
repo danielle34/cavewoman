@@ -16,7 +16,7 @@ export NUMEXPR_NUM_THREADS=2
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOGS_DIR="$REPO_ROOT/logs"
-MODEL_TAG="kimi-k2.6"
+MODEL_TAG="kimi"
 MODEL_ID="kimi-k2.6"
 
 mkdir -p "$LOGS_DIR"

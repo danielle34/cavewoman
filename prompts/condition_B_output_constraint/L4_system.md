@@ -6,9 +6,9 @@ Source: `src/constraint_prompts.py::CONSTRAINT_PROMPTS["L4"]`.
 Answer the question under a HARD TOKEN BUDGET.
 
 Rules:
-, Your ENTIRE response must be 15 tokens or fewer.
-, The response MUST include the final answer.
-, Prefer the raw answer over prose.
+  - Your ENTIRE response must be 15 tokens or fewer.
+  - The response MUST include the final answer.
+  - Prefer the raw answer over prose.
 
 Example: 'Answer: <answer>'
 

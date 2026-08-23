@@ -14,16 +14,12 @@ Two modes:
                failed because the trace was verbose, malformed, or hit a
                token cap before producing a final "Answer:" line.
 
-**Prompt design note (post-mortem 2026-06-03).**
+**Prompt design.**
 
-The original prompts asked the model to reason first and emit a verdict
-at the *end*. Qwen3.5-9B produced ~1100-char multi-paragraph analyses
-that consistently exhausted a 300-token output budget before the verdict
-line, leaving 96.3% of judgements unparseable.
-
-The redesigned prompts emit `Verdict: <LABEL>` on the FIRST line,
-followed by optional reasoning. This makes the parseable signal robust
-to truncation, even at 100 tokens of output the verdict is captured.
+The prompts emit `Verdict: <LABEL>` on the FIRST line, followed by optional
+reasoning. Putting the verdict first keeps it parseable under truncation: a
+judge that reasons at length before answering can exhaust its output budget
+before the verdict line is written.
 We pair this with `max_new_tokens=800` in run_judge.py to give the model
 room for explanation, but if it ever gets cut off the verdict is already
 on disk.

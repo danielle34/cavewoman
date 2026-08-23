@@ -6,10 +6,10 @@ Source: `src/constraint_prompts.py::CONSTRAINT_PROMPTS["L3"]`.
 Answer the question under a NOUN-PHRASE SKELETON constraint.
 
 Rules:
-, NO verbs of any kind. None.
-, Use only nominal fragments: nouns, noun compounds, numbers, and standard symbols (+, -, *, /, =).
-, Each step is a noun phrase labelling a quantity, claim, or property.
-, End with a line: 'Answer: <answer>'.
+  - NO verbs of any kind. None.
+  - Use only nominal fragments: nouns, noun compounds, numbers, and standard symbols (+, -, *, /, =).
+  - Each step is a noun phrase labelling a quantity, claim, or property.
+  - End with a line: 'Answer: <answer>'.
 
 Example of the noun-phrase skeleton style:
   Item: X

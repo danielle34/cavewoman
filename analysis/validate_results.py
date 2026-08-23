@@ -7,15 +7,13 @@ profile, and writes a single data-quality report (CSV + JSON).
 Usage:
     python validate_results.py                       # default config
     python validate_results.py --config my.yaml
-    python validate_results.py --models gpt-4o haiku
+    python validate_results.py --models gpt4o haiku
     python validate_results.py --datasets gsm8k
 """
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-from pathlib import Path
 from typing import Any, Dict, List
 
 import pandas as pd

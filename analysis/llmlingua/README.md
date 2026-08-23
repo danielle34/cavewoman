@@ -22,6 +22,5 @@ Pipeline, in execution order:
 | `score.py` | Accuracy + NLI scoring of LLMLingua outputs against L0. |
 | `compare.py` | Build the cross-method comparison table reported in the paper. |
 | `score_bertscore.py` | BERTScore on LLMLingua vs CAVEWOMAN matched outputs. |
-| `finish_download_and_run.sh` | End-to-end driver for the BERTScore scoring pass. |
 
 Reference: Pan et al., *LLMLingua-2*, 2024.

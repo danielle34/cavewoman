@@ -20,7 +20,7 @@ Outputs land at:
 
 CLI example:
   python analysis/judge/run_judge.py \\
-      --mode pair --target_model qwen-2.5 \\
+      --mode pair --target_model qwen2.5 \\
       --dataset gsm8k --condition output \\
       --n_samples 100 \\
       --judge_model_path <path-or-huggingface-id> \\
@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
 import sys
 import time
@@ -57,7 +56,7 @@ def parse_args():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--mode", required=True, choices=["pair", "recovery"])
     p.add_argument("--target_model", required=True,
-                   help="Tag of the model whose outputs we are judging (e.g. qwen-2.5, gpt-4o, sonnet-4.6).")
+                   help="Tag of the model whose outputs we are judging (e.g. qwen2.5, gpt4o, sonnet).")
     p.add_argument("--dataset", required=True,
                    choices=["gsm8k", "boolq", "arc_easy", "commonsenseqa", "mmlu_stem"])
     p.add_argument("--condition", required=True, choices=["output", "input"])
@@ -108,7 +107,7 @@ def jsonl_path(results_root: str, target_model: str, condition: str,
 
 def load_jsonl(path: Path) -> list[dict]:
     out = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -158,7 +157,7 @@ def completed_keys(out_path: Path, key_fn) -> set:
     if not out_path.exists():
         return set()
     out = set()
-    with open(out_path) as f:
+    with open(out_path, encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
@@ -204,7 +203,7 @@ def run_pair_mode(args, judge_runner) -> int:
     # Process each level
     total_processed = 0
     t_start = time.time()
-    with open(out_path, "a") as fout:
+    with open(out_path, "a", encoding="utf-8") as fout:
         for level in levels:
             lx_path = jsonl_path(args.results_root, args.target_model, args.condition,
                                   args.dataset, level)
@@ -250,7 +249,7 @@ def run_pair_mode(args, judge_runner) -> int:
                 fout.write(json.dumps(rec) + "\n"); fout.flush()
                 total_processed += 1
                 if total_processed % 25 == 0:
-                    elapsed = time.time(), t_start
+                    elapsed = time.time() - t_start
                     print(f"[pair] {total_processed} judged  elapsed={elapsed:.0f}s", flush=True)
     print(f"[pair] DONE  {total_processed} new judgements -> {out_path}", flush=True)
     return 0
@@ -292,7 +291,7 @@ def run_recovery_mode(args, judge_runner) -> int:
 
     total_processed = 0
     t_start = time.time()
-    with open(out_path, "a") as fout:
+    with open(out_path, "a", encoding="utf-8") as fout:
         for r in sampled:
             idx = r["idx"]
             if idx in done_keys:
@@ -329,7 +328,7 @@ def run_recovery_mode(args, judge_runner) -> int:
             fout.write(json.dumps(rec) + "\n"); fout.flush()
             total_processed += 1
             if total_processed % 25 == 0:
-                elapsed = time.time(), t_start
+                elapsed = time.time() - t_start
                 print(f"[recovery] {total_processed} judged  elapsed={elapsed:.0f}s", flush=True)
 
     print(f"[recovery] DONE  {total_processed} new judgements -> {out_path}", flush=True)
@@ -356,8 +355,8 @@ def make_judge_runner(args):
     print(f"[load] loading judge model from {args.judge_model_path}", flush=True)
     t0 = time.time()
     tokenizer, model = load_model(args.judge_model_path, model_type="auto")
-    print(f"[load] judge loaded in {time.time(), t0:.1f}s  "
-          f"family={getattr(model, '_caveman_family', None)!r}", flush=True)
+    print(f"[load] judge loaded in {time.time() - t0:.1f}s  "
+          f"family={getattr(model, '_cavewoman_family', None)!r}", flush=True)
 
     def _run(system_prompt, user_message, max_new_tokens, _dry_run):
         result = run_inference(

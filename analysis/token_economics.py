@@ -5,7 +5,7 @@ Computes per-lane:
 , output-token expansion vs L0
 , total cost savings vs L0
 , cost-per-correct
-, break-even output expansion e_max = 1 + ((1, r) * I) / (rho * O)
+, break-even output expansion e_max = 1 + ((1 - r) * I) / (rho * O)
      where r = input cost ratio achieved, rho = output/input price ratio
      I, O = L0 input/output token volumes per record
 Flags cells where compression is cost-negative (more expensive than L0).
@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -52,8 +51,13 @@ def apply_pricing(token_df: pd.DataFrame, cfg: Config,
     (useful for "what if everything ran on DSv4 Pro?" projections).
     """
     rows: List[Dict[str, Any]] = []
+    _unpriced: set = set()
     for _, r in token_df.iterrows():
         key = pricing_key_override or r["model"]
+        if key not in cfg.pricing:
+            # A tag with no pricing entry would otherwise price as free and the
+            # whole cost analysis would read $0 with no error. Say so instead.
+            _unpriced.add(key)
         rates = cfg.pricing.get(key, {"input": 0.0, "output": 0.0})
         ci = float(rates.get("input", 0.0))
         co = float(rates.get("output", 0.0))
@@ -68,6 +72,13 @@ def apply_pricing(token_df: pd.DataFrame, cfg: Config,
             "cost_output":    out_cost,
             "cost_total":     in_cost + out_cost,
         })
+    if _unpriced:
+        raise SystemExit(
+            "no pricing entry for: " + ", ".join(sorted(_unpriced))
+            + "\nAdd them under `pricing:` in analysis/config.yaml. Keys are"
+            + " the result-tree model tags (gpt4o, haiku, ...), not display"
+            + " names. Without an entry the model prices as free."
+        )
     return pd.DataFrame(rows)
 
 
@@ -89,11 +100,11 @@ def compute_savings_vs_l0(cost_df: pd.DataFrame) -> pd.DataFrame:
             out_rows.append({
                 "model": m, "dataset": ds, "condition": c, "level": level,
                 "input_token_ratio_to_L0":  in_ratio,
-                "input_token_savings_pct":  (1, in_ratio) * 100 if not np.isnan(in_ratio) else np.nan,
+                "input_token_savings_pct":  (1 - in_ratio) * 100 if not np.isnan(in_ratio) else np.nan,
                 "output_token_ratio_to_L0": out_ratio,
-                "output_token_expansion_pct": (out_ratio, 1) * 100 if not np.isnan(out_ratio) else np.nan,
+                "output_token_expansion_pct": (out_ratio - 1) * 100 if not np.isnan(out_ratio) else np.nan,
                 "cost_ratio_to_L0":         cost_ratio,
-                "cost_savings_pct":         (1, cost_ratio) * 100 if not np.isnan(cost_ratio) else np.nan,
+                "cost_savings_pct":         (1 - cost_ratio) * 100 if not np.isnan(cost_ratio) else np.nan,
                 "cost_total":               r["cost_total"],
                 "cost_negative":            bool(cost_ratio > 1.0) if not np.isnan(cost_ratio) else False,
             })
@@ -104,7 +115,7 @@ def break_even_table(cost_df: pd.DataFrame) -> pd.DataFrame:
     """Per (model, dataset, condition, level), compute e_max, the max output
     expansion before compression turns cost-negative.
 
-    e_max = 1 + ((1, r) * I) / (rho * O)
+    e_max = 1 + ((1 - r) * I) / (rho * O)
 
       r   = input-token ratio achieved at this level vs L0   (I_Lx / I_L0)
       rho = output_price / input_price                        (per model)
@@ -125,7 +136,7 @@ def break_even_table(cost_df: pd.DataFrame) -> pd.DataFrame:
         for _, r in grp.iterrows():
             level = r["level"]
             r_ratio = float(r["in_tokens_mean"]) / I if I > 0 else np.nan
-            e_max = 1 + ((1, r_ratio) * I) / (rho * O) if not np.isnan(r_ratio) else np.nan
+            e_max = 1 + ((1 - r_ratio) * I) / (rho * O) if not np.isnan(r_ratio) else np.nan
             actual_e = float(r["out_tokens_mean"]) / O if O > 0 else np.nan
             rows.append({
                 "model": m, "dataset": ds, "condition": c, "level": level,

@@ -12,7 +12,7 @@ matters.
 Implementation:
   , Tokenize on whitespace (rough word-level).
   , For target τ, keep round(τ * N) tokens chosen uniformly without replacement.
-  , Use a deterministic per-(dataset, idx, tau) seed so this is reproducible.
+    - Use a deterministic per-(dataset, idx, tau) seed so this is reproducible.
   , Preserve original token order in the reconstructed prompt.
 
 This runs locally in <1 min, no model loading, no GPU. Output schema matches
@@ -36,12 +36,13 @@ import json
 import random
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "scripts"))
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
-from dataset_loader_multi import load_dataset_caveman  # noqa: E402
+from dataset_loader_multi import load_dataset_cavewoman  # noqa: E402
 
 OUT_BASE = REPO / "results" / "random" / "compressed"
 DATASETS = ["gsm8k", "boolq", "arc_easy", "commonsenseqa", "mmlu_stem"]
@@ -68,7 +69,7 @@ def _random_drop(text: str, tau: float, rng: random.Random) -> tuple[str, int, i
 
 
 def process(dataset: str, tau: float, limit: Optional[int]) -> Path:
-    items = load_dataset_caveman(dataset)
+    items = load_dataset_cavewoman(dataset)
     if limit:
         items = items[:limit]
     tau_tag = f"t{tau:g}"   # 0.5 -> "t0.5",  0.8 -> "t0.8"
@@ -78,7 +79,7 @@ def process(dataset: str, tau: float, limit: Optional[int]) -> Path:
     out_path = out_dir / f"{dataset}_random_compressed_{tau_tag}.jsonl"
     n_written = 0
     n_skipped = 0
-    with out_path.open("w") as f:
+    with out_path.open("w", encoding="utf-8") as f:
         for it in items:
             idx = it["idx"]
             qtext = it["question_formatted"]

@@ -17,6 +17,10 @@ paper. Each script is standalone and reads from a common
 
 Install pipeline-specific dependencies with `pip install -r requirements.txt`.
 
+All scripts here, numbered or standalone, accept `--results-root PATH` and
+honour `$CAVEWOMAN_RESULTS`. Model tags must match the result directory names
+(`gpt4o`, `qwen2.5`, `deepseek`, ...), not the display names used in the paper.
+
 ## Audit and verification scripts
 
 Standalone, not part of the numbered pipeline:
@@ -25,7 +29,7 @@ Standalone, not part of the numbered pipeline:
 |---|---|
 | `extraction_audit.py` | Per-cell answer-extraction-rate audit (paper appendix on extraction audit). |
 | `l4_length_distribution.py` | L4 output-length distribution and budget-violation rate. |
-| `verify_paper_numbers.py` | Spot-checks every numeric claim in the paper against the released per-cell summary CSVs. |
+| `price_vectors.py` | Projected per-item cost for the open-weight models under public-tier pricing. |
 
 ## Subpipelines
 
@@ -33,6 +37,8 @@ Standalone, not part of the numbered pipeline:
 |---|---|
 | [`llmlingua/`](llmlingua/) | LLMLingua-2 input-compression comparison (paper appendix on LLMLingua comparison). |
 | [`judge/`](judge/) | LLM-judge runs and verdict extraction for NLI judge reliability calibration (paper appendix on judge reliability and semantic robustness). |
+| [`floors/`](floors/) | Reference floors: sampling, register, and length-controlled. |
+| [`stats/`](stats/) | Bootstrap CIs, Benjamini-Hochberg correction, and adjudicated per-item labels. |
 
-Both subpipelines are self-contained and only used when reproducing
-those appendix results.
+Each subfolder is self-contained and only needed when reproducing that
+part of the paper.

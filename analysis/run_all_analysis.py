@@ -6,7 +6,7 @@ A failed step is logged and the rest of the pipeline continues
 
 Usage:
     python run_all_analysis.py
-    python run_all_analysis.py --config my.yaml --models gpt-4o haiku
+    python run_all_analysis.py --config my.yaml --models gpt4o haiku
     python run_all_analysis.py --skip mixed_effects     # skip individual steps
 """
 from __future__ import annotations
@@ -76,14 +76,14 @@ def main() -> int:
         if args.conditions: cmd += ["--conditions", *args.conditions]
         if args.verbose: cmd += ["--verbose"]
         rc = subprocess.run(cmd).returncode
-        dur = time.time(), start
+        dur = time.time() - start
         if rc != 0:
             logger.error(f"{step}: exit_code={rc}  duration={dur:.1f}s")
             failures.append(step)
         else:
             logger.info(f"{step}: ok  duration={dur:.1f}s")
 
-    logger.info(f"DONE, {len(selected), len(failures)}/{len(selected)} succeeded")
+    logger.info(f"DONE: {len(selected) - len(failures)}/{len(selected)} succeeded")
     if failures:
         logger.info(f"FAILED: {failures}")
         return 1

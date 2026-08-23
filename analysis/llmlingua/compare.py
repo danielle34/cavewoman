@@ -1,6 +1,6 @@
-"""Step 5, dissociation tables + LLMLingua-vs-caveman comparison (single level).
+"""Step 5, dissociation tables + LLMLingua-vs-CAVEWOMAN comparison (single level).
 
-Treats "LLMLingua" as one method/level peer to caveman's L0/L1/L2/L3/L4.
+Treats "LLMLingua" as one method/level peer to CAVEWOMAN's L0/L1/L2/L3/L4.
 
 Reads:
     LLMLingua scored outputs (one level per (model, dataset)):
@@ -13,9 +13,9 @@ Reads:
 Builds:
     results/llmlingua/dissociation_table.csv          (LLMLingua only, one row per model x dataset)
     results/llmlingua/caveman_dissociation_table.csv  (caveman L1/L2)
-    results/llmlingua/method_comparison_table.csv     (LLMLingua + caveman side-by-side)
+    results/llmlingua/method_comparison_table.csv     (LLMLingua + CAVEWOMAN side-by-side)
     results/llmlingua/summary_for_paper.csv           (cross-cell mean per method/level)
-    figures/llmlingua/c2_comparison_llmlingua_vs_caveman.{pdf,png}
+    figures/llmlingua/c2_comparison_llmlingua_vs_cavewoman.{pdf,png}
 """
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ OUT_DIR = REPO / "results" / "llmlingua"
 FIG_DIR = REPO / "figures" / "llmlingua"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
-MODELS = ["gpt-4o", "sonnet-4.6", "qwen-2.5"]
+MODELS = ["gpt4o", "sonnet", "qwen2.5"]
 DATASETS = ["gsm8k", "boolq", "arc_easy"]
 LLM_LEVELS = ["LLMLingua", "LLMLingua_t0.8"]  # tau=0.5 (all models) + tau=0.8 (qwen only)
 CAV_LEVELS = ["L1", "L2"]
@@ -42,7 +42,7 @@ CAV_LEVELS = ["L1", "L2"]
 def read_jsonl(p: Path) -> list:
     if not p.exists():
         return []
-    return [json.loads(line) for line in p.open()]
+    return [json.loads(line) for line in p.open(encoding="utf-8")]
 
 
 def load_llmlingua_scored() -> pd.DataFrame:
@@ -55,7 +55,7 @@ def load_llmlingua_scored() -> pd.DataFrame:
                     continue
                 # Each level surfaces as its own "method" so the comparison
                 # figure can show LLMLingua-τ=0.5 and LLMLingua-τ=0.8 side by
-                # side as peer methods to caveman L1/L2.
+                # side as peer methods to CAVEWOMAN L1/L2.
                 method_label = "LLMLingua (τ=0.5)" if lv == "LLMLingua" else f"LLMLingua (τ=0.8)"
                 for r in read_jsonl(p):
                     rows.append({
@@ -71,7 +71,7 @@ def load_llmlingua_scored() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def load_caveman() -> pd.DataFrame:
+def load_cavewoman() -> pd.DataFrame:
     rows = []
     for m in MODELS:
         for d in DATASETS:
@@ -124,7 +124,7 @@ def summarize(df: pd.DataFrame) -> pd.DataFrame:
 
 def make_c2_figure(summary: pd.DataFrame) -> None:
     """C2 by (model, dataset), bars per (method, level): one LLMLingua bar +
-    two caveman bars (L1, L2)."""
+    two CAVEWOMAN bars (L1, L2)."""
     rows = MODELS
     cols = DATASETS
     fig, axes = plt.subplots(len(rows), len(cols),
@@ -163,14 +163,14 @@ def make_c2_figure(summary: pd.DataFrame) -> None:
                  "Condition A (input compression)", fontsize=11)
     fig.tight_layout(rect=[0, 0, 1, 0.95])
     for ext in ("pdf", "png"):
-        fig.savefig(FIG_DIR / f"c2_comparison_llmlingua_vs_caveman.{ext}",
+        fig.savefig(FIG_DIR / f"c2_comparison_llmlingua_vs_cavewoman.{ext}",
                     dpi=200, bbox_inches="tight")
     plt.close(fig)
 
 
 def main() -> None:
     df_ll = add_dissociation_cells(load_llmlingua_scored())
-    df_cv = add_dissociation_cells(load_caveman())
+    df_cv = add_dissociation_cells(load_cavewoman())
     if df_ll.empty:
         print("[compare] No LLMLingua scored outputs found. Run score.py first.")
         return
@@ -198,7 +198,7 @@ def main() -> None:
     print(cross.to_string(index=False))
 
     make_c2_figure(cmp)
-    print(f"\nFigure written: {FIG_DIR}/c2_comparison_llmlingua_vs_caveman.{{pdf,png}}")
+    print(f"\nFigure written: {FIG_DIR}/c2_comparison_llmlingua_vs_cavewoman.{{pdf,png}}")
 
 
 if __name__ == "__main__":

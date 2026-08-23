@@ -15,9 +15,8 @@ Usage:
 
 If --text is omitted, a built-in example is used.
 
-The rules are reproduced verbatim from
-src/dataset_loader_multi.py::compress_input() in the working
-research repo. See also:
+This calls src/dataset_loader_multi.py::compress_input() directly, so the
+demo cannot drift from the filter the benchmark actually uses. See also
 prompts/condition_A_input_compression/README.md.
 """
 
@@ -25,13 +24,12 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 from typing import Iterable
 
-DROP_TAGS_L1 = frozenset({"DT", "IN", "CC", "RP", "TO", "MD"})
-KEEP_TAGS_L2 = frozenset(
-    {"NN", "NNS", "NNP", "NNPS", "VB", "VBZ", "VBD", "VBN", "VBG", "CD"}
-)
-KEEP_TAGS_L3 = frozenset({"NN", "NNS", "NNP", "NNPS", "CD"})
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from dataset_loader_multi import compress_input  # noqa: E402
+
 
 
 def _load_nlp():
@@ -51,30 +49,10 @@ def _load_nlp():
 def compress(text: str, level: str, nlp=None) -> str:
     """Apply the Condition A compression at the given level.
 
-    Returns the original text if the level produces an empty string,
-    matching the working-repo runner's empty-after-filter fallback.
+    Thin wrapper over the benchmark's own filter. Note that L4 truncates the
+    L3 output, not the raw text, which keeps the ladder monotone.
     """
-    if level == "L0":
-        return text
-    if level == "L4":
-        toks = text.split()
-        return " ".join(toks[:15])
-
-    if nlp is None:
-        nlp = _load_nlp()
-    doc = nlp(text)
-
-    if level == "L1":
-        kept = [t.text for t in doc if t.tag_ not in DROP_TAGS_L1]
-    elif level == "L2":
-        kept = [t.text for t in doc if t.tag_ in KEEP_TAGS_L2]
-    elif level == "L3":
-        kept = [t.text for t in doc if t.tag_ in KEEP_TAGS_L3]
-    else:
-        raise ValueError(f"Unknown level: {level}")
-
-    out = " ".join(kept).strip()
-    return out if out else text
+    return compress_input(text, level)
 
 
 def parse_levels(s: str) -> Iterable[str]:

@@ -16,7 +16,7 @@ export NUMEXPR_NUM_THREADS=2
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOGS_DIR="$REPO_ROOT/logs"
-MODEL_TAG="sonnet-4.6"
+MODEL_TAG="sonnet"
 MODEL_ID="claude-sonnet-4-6"
 
 mkdir -p "$LOGS_DIR"

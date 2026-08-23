@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -69,10 +68,10 @@ def acc_threshold(lane: pd.DataFrame, cfg: Config) -> Dict:
         idx = first_level_below(bm, threshold, levels)
         if idx is not None:
             boots.append(idx)
-    alpha = (1.0, float(cfg.stats["bootstrap_ci"])) / 2.0
+    alpha = (1.0 - float(cfg.stats["bootstrap_ci"])) / 2.0
     if boots:
         lo = float(np.quantile(boots, alpha))
-        hi = float(np.quantile(boots, 1, alpha))
+        hi = float(np.quantile(boots, 1 - alpha))
     else:
         lo = hi = None
     return {
@@ -107,10 +106,10 @@ def sem_threshold(lane: pd.DataFrame, cfg: Config) -> Dict:
         idx = first_level_below(bm, threshold, levels)
         if idx is not None:
             boots.append(idx)
-    alpha = (1.0, float(cfg.stats["bootstrap_ci"])) / 2.0
+    alpha = (1.0 - float(cfg.stats["bootstrap_ci"])) / 2.0
     if boots:
         lo = float(np.quantile(boots, alpha))
-        hi = float(np.quantile(boots, 1, alpha))
+        hi = float(np.quantile(boots, 1 - alpha))
     else:
         lo = hi = None
     return {"L_c_sem": L_c, "threshold": threshold,

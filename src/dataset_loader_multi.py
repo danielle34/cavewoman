@@ -1,14 +1,14 @@
 """Multi-dataset loader for CAVEWOMAN (5 datasets, 3 answer types, input compression).
 
 Supported datasets:
-, gsm8k         (openai/gsm8k, main, test, ~1319)            numeric
-, boolq         (google/boolq,        validation, ~3270)     boolean
-, arc_easy      (allenai/ai2_arc, ARC-Easy, test, ~2376)     multiple_choice
-, commonsenseqa (tau/commonsense_qa,  validation, ~1221)     multiple_choice
-, mmlu_stem     (cais/mmlu, all, test, STEM-filtered)        multiple_choice
+  - gsm8k         (openai/gsm8k, main, test, ~1319)            numeric
+  - boolq         (google/boolq,        validation, ~3270)     boolean
+  - arc_easy      (allenai/ai2_arc, ARC-Easy, test, ~2376)     multiple_choice
+  - commonsenseqa (tau/commonsense_qa,  validation, ~1221)     multiple_choice
+  - mmlu_stem     (cais/mmlu, all, test, STEM-filtered)        multiple_choice
 
 Public API:
-    load_dataset_caveman(name, split=None, n=None, seed=42) -> List[Dict]
+    load_dataset_cavewoman(name, split=None, n=None, seed=42) -> List[Dict]
     extract_answer(text, answer_type) -> Optional[str]
     check_correct(predicted, ground_truth, answer_type) -> bool
     compress_input(text, level) -> str
@@ -230,7 +230,7 @@ _LOADERS = {
 }
 
 
-def load_dataset_caveman(name: str, split: Optional[str] = None,
+def load_dataset_cavewoman(name: str, split: Optional[str] = None,
                          n: Optional[int] = None, seed: int = 42) -> List[Dict]:
     """Dispatch by dataset name; return list of canonical CAVEWOMAN items.
 
@@ -351,7 +351,7 @@ def check_correct(predicted, ground_truth, answer_type: str) -> bool:
         p, g = _to_float(predicted), _to_float(ground_truth)
         if p is None or g is None:
             return False
-        return abs(p, g) < 0.01
+        return abs(p - g) < 0.01
     if answer_type == "boolean":
         return str(predicted).strip().lower() == str(ground_truth).strip().lower()
     if answer_type == "multiple_choice":
@@ -378,9 +378,8 @@ def compress_input(text: str, level: str) -> str:
         return text
 
     if level == "L4":
-        # L4 is L3 truncated to 15 tokens, so it's a strict subset of L3 (the
-        # CAVEWOMAN ladder is monotone). Previously L4 truncated the raw text,
-        # which kept function words / verbs / adjectives and broke the ladder.
+        # L4 truncates L3, not the raw text, so it stays a strict subset of
+        # L3 and the ladder remains monotone.
         l3_text = compress_input(text, "L3")
         tokens = l3_text.split()
         result = " ".join(tokens[:15]).strip()
@@ -425,7 +424,7 @@ if __name__ == "__main__":
     first_gsm8k = None
     for name in ["gsm8k", "boolq", "arc_easy", "commonsenseqa", "mmlu_stem"]:
         print(f"\n--- {name} ---")
-        items = load_dataset_caveman(name, n=3)
+        items = load_dataset_cavewoman(name, n=3)
         for i, it in enumerate(items):
             fq = it["question_formatted"]
             preview = (fq[:240] + "…") if len(fq) > 240 else fq

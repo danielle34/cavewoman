@@ -2,7 +2,7 @@
 
 import os
 import time
-from typing import Dict, Optional, Tuple
+from typing import Dict
 
 import torch
 from transformers import (
@@ -22,10 +22,10 @@ except ImportError:
 # Per-family overrides. Detected from the model_path basename or the explicit
 # model_type. Keep this short, only quirks that break under defaults.
 #
-#, NO_SYSTEM_ROLE_FAMILIES: chat templates that reject {"role":"system",...}.
+# - NO_SYSTEM_ROLE_FAMILIES: chat templates that reject {"role":"system",...}.
 #   For these we fold the system prompt into the first user turn so the same
 #   CAVEWOMAN system_prompt text still reaches the model.
-#, EAGER_ATTN_FAMILIES: models whose logit soft-capping silently degrades
+# - EAGER_ATTN_FAMILIES: models whose logit soft-capping silently degrades
 #   under SDPA/FlashAttention2; must pass attn_implementation="eager".
 NO_SYSTEM_ROLE_FAMILIES = {"gemma", "deepseek"}
 EAGER_ATTN_FAMILIES = {"gemma"}
@@ -42,8 +42,8 @@ def _infer_family(model_type_hint: str, path: str) -> str:
     known = {"qwen", "qwen3.5", "llama", "deepseek", "gemma", "mistral"}
     if hint in known:
         # Special cases:
-        # , short tag 'qwen' currently means Qwen2.5-VL (multimodal)
-        # , short tag 'qwen3.5' means Qwen3.5-9B (uses its own VL class)
+        #   - short tag 'qwen' currently means Qwen2.5-VL (multimodal)
+        #   - short tag 'qwen3.5' means Qwen3.5-9B (uses its own VL class)
         if hint == "qwen":
             return "qwen-vl"
         if hint == "qwen3.5":
@@ -109,15 +109,15 @@ def load_model(model_name_or_path: str, model_type: str = "auto"):
     with per-family overrides for the chat template and attention kernel.
 
     Routing:
-    , family in {'qwen-vl'}        -> Qwen2_5_VLForConditionalGeneration
-    , family in {'llama','deepseek','gemma','mistral','auto'} -> AutoModelForCausalLM
-    , family in EAGER_ATTN_FAMILIES (gemma) -> attn_implementation='eager'
+      - family in {'qwen-vl'}        -> Qwen2_5_VLForConditionalGeneration
+      - family in {'llama','deepseek','gemma','mistral','auto'} -> AutoModelForCausalLM
+      - family in EAGER_ATTN_FAMILIES (gemma) -> attn_implementation='eager'
 
     All branches use torch_dtype=bfloat16, device_map='auto', and
     trust_remote_code=True so custom modeling files in the snapshot load.
 
     The detected family is stamped onto the returned model as
-    `model._caveman_family`. `run_inference` reads that to decide whether the
+    `model._cavewoman_family`. `run_inference` reads that to decide whether the
     chat template needs the system-role-fold (Gemma, DeepSeek).
     """
     path = os.path.expanduser(model_name_or_path)
@@ -156,8 +156,8 @@ def load_model(model_name_or_path: str, model_type: str = "auto"):
     t0 = time.time()
     model = model_cls.from_pretrained(path, **load_kwargs)
     model.eval()
-    model._caveman_family = family  # noqa: SLF001, read by run_inference()
-    print(f"[model_loader] Model loaded in {time.time(), t0:.1f}s")
+    model._cavewoman_family = family  # noqa: SLF001, read by run_inference()
+    print(f"[model_loader] Model loaded in {time.time() - t0:.1f}s")
     _log_gpu_memory()
     return tokenizer, model
 
@@ -175,20 +175,29 @@ def run_inference(
     user_message: str,
     max_new_tokens: int = 300,
     temperature: float = 0.0,
+    enable_thinking=None,
 ) -> Dict:
     """Run a single chat-formatted generation; return decoded text + metrics.
 
-    The message structure is family-aware via `model._caveman_family`:
+    The message structure is family-aware via `model._cavewoman_family`:
     families whose chat template rejects role='system' (Gemma, DeepSeek) get
     the system prompt folded into the first user turn. See
     `build_messages_for_family()`.
+
+    `enable_thinking` is tri-state: None leaves the template untouched, which
+    for Qwen3-family models means thinking is ON. Only False suppresses the
+    reasoning block.
     """
-    family = getattr(model, "_caveman_family", "auto")
+    family = getattr(model, "_cavewoman_family", "auto")
     messages = build_messages_for_family(family, system_prompt, user_message)
+    template_kwargs = {}
+    if enable_thinking is not None:
+        template_kwargs["enable_thinking"] = enable_thinking
     prompt_text = tokenizer.apply_chat_template(
         messages,
         tokenize=False,
         add_generation_prompt=True,
+        **template_kwargs,
     )
     inputs = tokenizer(prompt_text, return_tensors="pt").to(model.device)
     input_token_count = inputs["input_ids"].shape[1]
@@ -205,7 +214,7 @@ def run_inference(
 
     t0 = time.time()
     output_ids = model.generate(**inputs, **gen_kwargs)
-    latency_s = time.time(), t0
+    latency_s = time.time() - t0
 
     new_tokens = output_ids[0][input_token_count:]
     output_text = tokenizer.decode(new_tokens, skip_special_tokens=True)

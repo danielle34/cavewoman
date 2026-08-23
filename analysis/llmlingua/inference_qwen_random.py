@@ -1,7 +1,7 @@
 """Step 3b (Random-deletion variant), Qwen2.5-VL-7B inference on randomly-compressed prompts.
 
 Mirrors inference_qwen.py exactly, but reads from `results/random/compressed/`
-and writes to `results/random/inference/qwen-2.5/` with `Random_t0.5` / `Random_t0.8`
+and writes to `results/random/inference/qwen2.5/` with `Random_t0.5` / `Random_t0.8`
 level names instead of `LLMLingua_...`.
 
 Use:
@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import signal
 import sys
 import time
@@ -23,12 +22,13 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
-sys.path.insert(0, str(REPO / "scripts"))
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
 from dataset_loader_multi import extract_answer, check_correct  # noqa: E402
 
 COMPRESSED_BASE = REPO / "results" / "random" / "compressed"
-OUT_BASE = REPO / "results" / "random" / "inference" / "qwen-2.5"
+OUT_BASE = REPO / "results" / "random" / "inference" / "qwen2.5"
 
 NEUTRAL_INPUT_SYSTEM_PROMPT = (
     "You are a helpful assistant. "
@@ -63,7 +63,7 @@ def read_completed(path: Path) -> set:
     if not path.exists():
         return set()
     done = set()
-    with path.open() as f:
+    with path.open(encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
@@ -78,7 +78,7 @@ def load_compressed(dataset: str, in_filename_tmpl: str) -> list:
     rows = []
     if not p.exists():
         return rows
-    with p.open() as f:
+    with p.open(encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
@@ -104,7 +104,7 @@ def run_one(dataset, tokenizer, model, run_inference,
     t0 = time.time()
     correct = 0
     n = 0
-    with out_path.open("a") as f:
+    with out_path.open("a", encoding="utf-8") as f:
         for rec in todo:
             if _STOP["flag"]:
                 print(f"[{dataset}] stopping early due to signal", flush=True)
@@ -136,7 +136,7 @@ def run_one(dataset, tokenizer, model, run_inference,
                 "idx": rec["idx"],
                 "dataset": dataset,
                 "level": level_name,
-                "model_tag": "qwen-2.5",
+                "model_tag": "qwen2.5",
                 "system_prompt_kind": "neutral_input",
                 "compressed_prompt": prompt,
                 "original_prompt": rec["original_prompt"],
@@ -156,9 +156,9 @@ def run_one(dataset, tokenizer, model, run_inference,
             f.flush()
             n += 1
             if n % 25 == 0 or n == 1:
-                elapsed = time.time(), t0
+                elapsed = time.time() - t0
                 rate = n / elapsed if elapsed > 0 else 0
-                eta = (len(todo), n) / rate if rate > 0 else 0
+                eta = (len(todo) - n) / rate if rate > 0 else 0
                 acc = correct / n if n else 0
                 print(f"  [{dataset}] n={n}/{len(todo)}  acc={acc:.3f}  "
                       f"rate={rate:.2f}/s  eta={eta/60:.1f}min", flush=True)

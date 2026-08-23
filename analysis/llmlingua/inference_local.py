@@ -4,8 +4,8 @@ Replaces the per-model variants (inference_qwen.py). Takes --model_tag
 and dispatches to the right loader via src/model_loader.py.
 
 Supported tags (with their HuggingFace IDs as the recommended --model_path):
-    qwen-2.5  -> Qwen/Qwen2.5-VL-7B-Instruct           (model_type='qwen')
-    qwen-3.5  -> Qwen/Qwen3.5-9B-Instruct              (model_type='qwen-3.5')
+    qwen2.5   -> Qwen/Qwen2.5-VL-7B-Instruct           (model_type='qwen')
+    qwen3.5   -> Qwen/Qwen3.5-9B-Instruct              (model_type='qwen3.5')
     deepseek -> deepseek-ai/DeepSeek-R1-Distill-Qwen-7B (model_type='deepseek')
 
 `--model_path` is required; pass a local snapshot path or the HuggingFace ID.
@@ -39,12 +39,13 @@ LEVEL_NAME = "LLMLingua"
 MAX_NEW_TOKENS = 400
 
 MODEL_REGISTRY = {
-    # Keys are the HuggingFace-release tags used in output paths.
-    # `model_type` is the internal family hint consumed by src/model_loader.py.
-    "qwen-2.5":     {"model_type": "qwen"},
-    "qwen-3.5":     {"model_type": "qwen3.5"},
-    "deepseek-r1":  {"model_type": "deepseek"},
-    "gemma-4":      {"model_type": "gemma"},
+    # Keys are the result-tree tags: they become the output directory name
+    # (results/llmlingua/inference/<tag>/) and must match the tags score.py
+    # reads. `model_type` is the family hint consumed by src/model_loader.py.
+    "qwen2.5":  {"model_type": "qwen"},
+    "qwen3.5":  {"model_type": "qwen3.5"},
+    "deepseek": {"model_type": "deepseek"},
+    "gemma4":   {"model_type": "gemma"},
 }
 
 _STOP = {"flag": False}
@@ -64,7 +65,7 @@ def read_completed(path: Path) -> set:
     if not path.exists():
         return set()
     done = set()
-    with path.open() as f:
+    with path.open(encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
@@ -77,7 +78,7 @@ def read_completed(path: Path) -> set:
 def load_compressed(dataset: str) -> list:
     p = COMPRESSED_BASE / dataset / f"{dataset}_compressed.jsonl"
     rows = []
-    with p.open() as f:
+    with p.open(encoding="utf-8") as f:
         for line in f:
             rec = json.loads(line)
             rows.append(rec)
@@ -100,7 +101,7 @@ def run_one(dataset: str, model_tag: str, tokenizer, model, run_inference,
     t0 = time.time()
     correct = 0
     n = 0
-    with out_path.open("a") as f:
+    with out_path.open("a", encoding="utf-8") as f:
         for rec in todo:
             if _STOP["flag"]:
                 print(f"[{dataset}] stopping early due to signal", flush=True)
@@ -155,9 +156,9 @@ def run_one(dataset: str, model_tag: str, tokenizer, model, run_inference,
             f.flush()
             n += 1
             if n % 25 == 0 or n == 1:
-                elapsed = time.time(), t0
+                elapsed = time.time() - t0
                 rate = n / elapsed if elapsed > 0 else 0
-                eta = (len(todo), n) / rate if rate > 0 else 0
+                eta = (len(todo) - n) / rate if rate > 0 else 0
                 acc = correct / n if n else 0
                 print(f"  [{dataset}] n={n}/{len(todo)}  acc={acc:.3f}  "
                       f"rate={rate:.2f}/s  eta={eta/60:.1f}min", flush=True)

@@ -12,7 +12,7 @@ spacy_model: en_core_web_sm
 penntreebank_tags: true
 
 levels:
-, id: L0
+  - id: L0
     short: unconstrained
     description: Full sentences, complete chain-of-thought reasoning.
     max_output_tokens: 400
@@ -22,7 +22,7 @@ levels:
     condition_b:
       register: 'Unconstrained, full prose, "Answer: <answer>" on its own line at end.'
 
-, id: L1
+  - id: L1
     short: telegraphic
     description: No function words (articles, conjunctions, prepositions).
     max_output_tokens: 300
@@ -33,7 +33,7 @@ levels:
     condition_b:
       register: 'Telegraphic. Reasoning steps as short fragments. End with "Answer: <answer>".'
 
-, id: L2
+  - id: L2
     short: keyword_only
     description: Nouns and main verbs only, fragments and lists.
     max_output_tokens: 200
@@ -46,7 +46,7 @@ levels:
     condition_b:
       register: 'Keyword-only. No grammar, no full sentences. End with "Answer: <answer>".'
 
-, id: L3
+  - id: L3
     short: noun_phrase_skeleton
     description: No verbs, only nominal fragments and numbers.
     max_output_tokens: 150
@@ -57,7 +57,7 @@ levels:
     condition_b:
       register: 'Noun-phrase skeleton. No verbs of any kind. End with "Answer: <answer>".'
 
-, id: L4
+  - id: L4
     short: hard_15_token_budget
     description: Hard token budget, entire response must be 15 tokens or fewer.
     max_output_tokens: 20

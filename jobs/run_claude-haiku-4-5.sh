@@ -16,7 +16,7 @@ export NUMEXPR_NUM_THREADS=2
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOGS_DIR="$REPO_ROOT/logs"
-MODEL_TAG="haiku-4.5"
+MODEL_TAG="haiku"
 MODEL_ID="claude-haiku-4-5"
 
 mkdir -p "$LOGS_DIR"

@@ -1,9 +1,9 @@
 """Re-extract verdicts from existing judge JSONLs using the current
 `extract_verdict()` parser. Useful when:
 
-, the parser was updated and we want to re-apply it without
+  - the parser was updated and we want to re-apply it without
     re-running GPU inference,
-, we want a quick parse-rate sanity check on a finished cell.
+  - we want a quick parse-rate sanity check on a finished cell.
 
 The script reads each input JSONL, applies extract_verdict() to the
 `judge_raw_output` field of every record, updates `judge_verdict`, and
@@ -32,7 +32,7 @@ from prompts import (  # noqa: E402
 
 def re_extract_file(path: Path, write: bool) -> dict:
     records = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -109,8 +109,8 @@ def main() -> int:
     print("-" * 110)
     print(f"{'TOTAL':<80}{grand_total:>6}{grand_before_none:>8}{grand_after_none:>8}{grand_changed:>8}")
     if grand_total > 0:
-        old_rate = 100 * (grand_total, grand_before_none) / grand_total
-        new_rate = 100 * (grand_total, grand_after_none) / grand_total
+        old_rate = 100 * (grand_total - grand_before_none) / grand_total
+        new_rate = 100 * (grand_total - grand_after_none) / grand_total
         print(f"  extraction rate: {old_rate:.1f}% → {new_rate:.1f}%  "
               f"({grand_changed} records changed)")
     return 0

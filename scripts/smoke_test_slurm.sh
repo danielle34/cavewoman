@@ -87,7 +87,7 @@ echo
 # ---- step 2: real generation ----
 echo "==== step 2: Qwen2.5-VL-7B on $CAVEWOMAN_DATASET Cond A, n=$CAVEWOMAN_N_ITEMS, all 5 levels ===="
 python run_experiment.py \
-    --model_name qwen-2.5 \
+    --model_name qwen2.5 \
     --model_path "$CAVEWOMAN_MODEL_PATH" \
     --dataset   "$CAVEWOMAN_DATASET" \
     --condition input \

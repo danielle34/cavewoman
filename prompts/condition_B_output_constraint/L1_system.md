@@ -6,10 +6,10 @@ Source: `src/constraint_prompts.py::CONSTRAINT_PROMPTS["L1"]`.
 Answer the question under a TELEGRAPHIC constraint.
 
 Rules:
-, DO NOT use any function words. No articles (the, a, an). No conjunctions (and, but, or, so). No prepositions (of, in, to, for, at, with, from, by, on, per).
-, DO use nouns, main verbs, numbers, and standard symbols (+, -, *, /, =).
-, Show each reasoning step.
-, End with a line: 'Answer: <answer>'.
+  - DO NOT use any function words. No articles (the, a, an). No conjunctions (and, but, or, so). No prepositions (of, in, to, for, at, with, from, by, on, per).
+  - DO use nouns, main verbs, numbers, and standard symbols (+, -, *, /, =).
+  - Show each reasoning step.
+  - End with a line: 'Answer: <answer>'.
 
 Example of the telegraphic style (task-neutral demonstration):
   Premise mentions item X. Property Y holds X. Match: yes.

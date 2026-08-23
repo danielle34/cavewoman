@@ -24,7 +24,7 @@ The two SLURM scripts target local-GPU runs of the open-weight panel
 
 | Script | Purpose |
 |---|---|
-| `submit_caveman.sh` | Full L0..L4 sweep, self-chains until `accuracy_summary.json` appears so a long run survives walltime limits. |
+| `submit_cavewoman.sh` | Full L0..L4 sweep, self-chains until `accuracy_summary.json` appears so a long run survives walltime limits. |
 | `submit_single_level.sh` | Single level of a single (model, dataset, condition) cell. Useful for retries. |
 
 The SLURM `#SBATCH` partition and time limits in those scripts are

@@ -1,4 +1,5 @@
 # Core runtime dependencies for CAVEWOMAN.
+# Requires Python 3.11 or newer.
 # Pin exact versions in a lockfile if you need bit-reproducible runs;
 # these constraints reflect what the released results were produced with.
 
@@ -29,3 +30,8 @@ pandas>=2.1
 tqdm>=4.66
 pyyaml>=6.0
 matplotlib>=3.8
+
+# Baseline comparison (analysis/llmlingua/ only; skip if you are not
+# reproducing the LLMLingua-2 and BERTScore baselines)
+llmlingua>=0.2
+bert-score>=0.3.13

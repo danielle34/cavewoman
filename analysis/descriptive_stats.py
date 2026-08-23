@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 import numpy as np
@@ -112,6 +111,16 @@ def main() -> int:
     # Restrict to accuracy + semantic_collapse + bidir entail + emb sim, pivoting level
     main_cols = ["accuracy", "semantic_collapse_rate", "bidir_entailment_rate",
                  "embedding_similarity"]
+    # Semantic columns only exist once the entailment and embedding scorers have
+    # run. Skip whichever are absent rather than failing the whole script.
+    missing = [k for k in main_cols if f"{k}__mean" not in out_df.columns]
+    if missing:
+        logger.warning(
+            "skipping %s in the summary table: not in the input. Run "
+            "evaluation/add_entailment_scores.py and add_embedding_scores.py "
+            "to populate them.", ", ".join(missing))
+        main_cols = [k for k in main_cols if k not in missing]
+
     pivot_frames = []
     for k in main_cols:
         sub = out_df[["model", "dataset", "condition", "level", f"{k}__mean"]].copy()
@@ -134,15 +143,18 @@ def main() -> int:
                     label="tab:descriptive-main", float_format="%.3f", logger=logger)
 
     # ----------------- per-(model, condition) summaries ----------------------
+    specs = {
+        "accuracy_mean":     ("accuracy__mean", "mean"),
+        "sem_collapse_mean": ("semantic_collapse_rate__mean", "mean"),
+        "entail_mean":       ("bidir_entailment_rate__mean", "mean"),
+        "cos_mean":          ("embedding_similarity__mean", "mean"),
+        "out_tok_mean":      ("output_tokens__mean", "mean"),
+        "cost_sum":          ("cost_usd__mean",
+                              lambda s: float(np.nansum(s.astype(float)))),
+    }
+    specs = {k: v for k, v in specs.items() if v[0] in out_df.columns}
     agg = (out_df.groupby(["model", "condition", "level"])
-                 .agg(accuracy_mean=("accuracy__mean", "mean"),
-                      sem_collapse_mean=("semantic_collapse_rate__mean", "mean"),
-                      entail_mean=("bidir_entailment_rate__mean", "mean"),
-                      cos_mean=("embedding_similarity__mean", "mean"),
-                      out_tok_mean=("output_tokens__mean", "mean"),
-                      cost_sum=("cost_usd__mean",
-                                lambda s: float(np.nansum(s.astype(float))))
-                 ).reset_index())
+                 .agg(**specs).reset_index())
     write_csv(agg, out["tables"] / "descriptive_per_model_condition.csv", logger=logger)
     logger.info(f"computed descriptives for {len(out_df)} cells "
                 f"across {out_df['model'].nunique()} model(s)")

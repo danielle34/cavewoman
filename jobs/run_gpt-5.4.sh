@@ -16,7 +16,7 @@ export NUMEXPR_NUM_THREADS=2
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOGS_DIR="$REPO_ROOT/logs"
-MODEL_TAG="gpt-5.4"
+MODEL_TAG="gpt5.4"
 MODEL_ID="gpt-5.4-2026-03-05"
 
 mkdir -p "$LOGS_DIR"

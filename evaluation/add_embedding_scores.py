@@ -60,7 +60,7 @@ def _resolve_condition(results_dir: Path, model_name: str, dataset: str,
 
 def read_jsonl(path: Path) -> List[Dict]:
     out: List[Dict] = []
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -95,7 +95,7 @@ def process_level(
 ) -> Dict:
     records = read_jsonl(lx_path)
     paired_idx = [i for i, r in enumerate(records) if r.get("idx") in l0_emb_by_idx]
-    unpaired = len(records), len(paired_idx)
+    unpaired = len(records) - len(paired_idx)
     if unpaired:
         print(f"  [{lvl}] WARNING: {unpaired} records have no L0 idx match (writing similarity=None)")
 
@@ -111,7 +111,7 @@ def process_level(
     sim_by_record_pos = {pos: float(sims[k]) for k, pos in enumerate(paired_idx)}
 
     sim_values: List[float] = []
-    with open(out_path, "w") as fout:
+    with open(out_path, "w", encoding="utf-8") as fout:
         for pos, r in enumerate(records):
             new_rec = dict(r)
             if pos in sim_by_record_pos:
@@ -175,11 +175,11 @@ def main() -> None:
         out_path = paths[lvl].with_name(paths[lvl].stem + "_with_embeddings.jsonl")
         if out_path.exists():
             try:
-                with open(out_path) as f:
+                with open(out_path, encoding="utf-8") as f:
                     n = sum(1 for _ in f)
             except Exception:
                 n = 0
-            expected = sum(1 for _ in open(paths[lvl]))
+            expected = sum(1 for _ in open(paths[lvl], encoding="utf-8"))
             if n == expected:
                 print(f"[resume] {lvl}: already complete ({n}/{expected}) → skip")
                 continue
@@ -201,7 +201,7 @@ def main() -> None:
     if l0_stats is not None:
         print(f"\n[sanity] L0 self-similarity: mean={l0_stats['mean']:.6f},"
               f" min={l0_stats['min']:.6f}  (expected mean=1.000000, min=1.000000)")
-        if abs(l0_stats["mean"], 1.0) > 1e-3 or l0_stats["min"] < 0.999:
+        if abs(l0_stats["mean"] - 1.0) > 1e-3 or l0_stats["min"] < 0.999:
             print("[sanity] WARNING: L0 self-similarity drifts from 1.0, verify idx alignment and encoder determinism")
 
     print("\n" + "=" * 80)

@@ -12,9 +12,9 @@ actually is (GSM8K math, BoolQ yes/no, ARC science MC, CommonsenseQA,
 MMLU-STEM).
 
 The answer-format directive 'Answer: <answer>' accepts:
-, a number for numeric questions     (GSM8K)
-, 'yes' or 'no' for boolean          (BoolQ)
-, a single letter (A, B, C, ...) for multiple choice
+  - a number for numeric questions     (GSM8K)
+  - 'yes' or 'no' for boolean          (BoolQ)
+  - a single letter (A, B, C, ...) for multiple choice
                                        (ARC-Easy, CommonsenseQA, MMLU-STEM)
 
 The post-record extractor (`dataset_loader_multi.extract_answer`)
@@ -26,11 +26,9 @@ Usage:
     system = CONSTRAINT_PROMPTS["L2"]
     max_new = get_max_tokens("L2")
 
-History: pre-2026-05-12 versions of these prompts framed every level as a
-"grade-school math word problem" and used a Janet/ducks worked example.
-That confounded non-math datasets, the model was being told to do math
-on yes/no questions. The generalised prompts in this file restore
-task-agnosticism. See git log for the original math-themed prompts.
+The prompts are deliberately task-agnostic: they describe the register only
+and never name a task type, so the same text applies to arithmetic, yes/no,
+and multiple-choice benchmarks alike.
 """
 
 LEVEL_ORDER = ["L0", "L1", "L2", "L3", "L4"]
@@ -67,13 +65,13 @@ CONSTRAINT_PROMPTS = {
         "Answer the question under a TELEGRAPHIC constraint.\n"
         "\n"
         "Rules:\n"
-        ", DO NOT use any function words. No articles (the, a, an). "
+        "  - DO NOT use any function words. No articles (the, a, an). "
         "No conjunctions (and, but, or, so). No prepositions (of, in, to, "
         "for, at, with, from, by, on, per).\n"
-        ", DO use nouns, main verbs, numbers, and standard symbols "
+        "  - DO use nouns, main verbs, numbers, and standard symbols "
         "(+, -, *, /, =).\n"
-        ", Show each reasoning step.\n"
-        ", End with a line: 'Answer: <answer>'.\n"
+        "  - Show each reasoning step.\n"
+        "  - End with a line: 'Answer: <answer>'.\n"
         "\n"
         "Example of the telegraphic style (task-neutral demonstration):\n"
         "  Premise mentions item X. Property Y holds X. Match: yes.\n"
@@ -86,11 +84,11 @@ CONSTRAINT_PROMPTS = {
         "Answer the question under a KEYWORD-ONLY constraint.\n"
         "\n"
         "Rules:\n"
-        ", Use ONLY nouns and main verbs. No grammar, no full sentences.\n"
-        ", Output as fragments, short labels, or list items.\n"
-        ", Numbers and standard symbols (+, -, *, /, =) are allowed.\n"
-        ", Each reasoning step appears as a fragment.\n"
-        ", End with a line: 'Answer: <answer>'.\n"
+        "  - Use ONLY nouns and main verbs. No grammar, no full sentences.\n"
+        "  - Output as fragments, short labels, or list items.\n"
+        "  - Numbers and standard symbols (+, -, *, /, =) are allowed.\n"
+        "  - Each reasoning step appears as a fragment.\n"
+        "  - End with a line: 'Answer: <answer>'.\n"
         "\n"
         "Example of the keyword-only style:\n"
         "  Item: X\n"
@@ -105,12 +103,12 @@ CONSTRAINT_PROMPTS = {
         "Answer the question under a NOUN-PHRASE SKELETON constraint.\n"
         "\n"
         "Rules:\n"
-        ", NO verbs of any kind. None.\n"
-        ", Use only nominal fragments: nouns, noun compounds, numbers, "
+        "  - NO verbs of any kind. None.\n"
+        "  - Use only nominal fragments: nouns, noun compounds, numbers, "
         "and standard symbols (+, -, *, /, =).\n"
-        ", Each step is a noun phrase labelling a quantity, claim, or "
+        "  - Each step is a noun phrase labelling a quantity, claim, or "
         "property.\n"
-        ", End with a line: 'Answer: <answer>'.\n"
+        "  - End with a line: 'Answer: <answer>'.\n"
         "\n"
         "Example of the noun-phrase skeleton style:\n"
         "  Item: X\n"
@@ -125,9 +123,9 @@ CONSTRAINT_PROMPTS = {
         "Answer the question under a HARD TOKEN BUDGET.\n"
         "\n"
         "Rules:\n"
-        ", Your ENTIRE response must be 15 tokens or fewer.\n"
-        ", The response MUST include the final answer.\n"
-        ", Prefer the raw answer over prose.\n"
+        "  - Your ENTIRE response must be 15 tokens or fewer.\n"
+        "  - The response MUST include the final answer.\n"
+        "  - Prefer the raw answer over prose.\n"
         "\n"
         "Example: 'Answer: <answer>'\n"
         "\n"

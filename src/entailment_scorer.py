@@ -49,7 +49,7 @@ def _label_map(model) -> List[str]:
 
 def _softmax(x) -> np.ndarray:
     x = np.asarray(x, dtype=np.float64)
-    x = x, x.max(axis=-1, keepdims=True)
+    x = x - x.max(axis=-1, keepdims=True)
     e = np.exp(x)
     return e / e.sum(axis=-1, keepdims=True)
 
@@ -135,8 +135,8 @@ if __name__ == "__main__":
     sp = compute_semantic_preservation(
         nli,
         l0_output=(
-            "Janet starts with 16 eggs. She eats 3 for breakfast (16, 3 = 13) "
-            "and uses 4 for muffins (13, 4 = 9). She sells 9 eggs at $2 each, "
+            "Janet starts with 16 eggs. She eats 3 for breakfast (16 - 3 = 13) "
+            "and uses 4 for muffins (13 - 4 = 9). She sells 9 eggs at $2 each, "
             "so she earns $18. Answer: 18"
         ),
         lx_output="Eggs 16. Eaten 3. Baked 4. Remain 9. Price 2. Earn 18. Answer: 18",

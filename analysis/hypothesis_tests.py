@@ -161,7 +161,7 @@ def h3_dissociation_table(df: pd.DataFrame, cfg: Config) -> pd.DataFrame:
             # McNemar uses off-diagonals b = C2 (correct & ¬entail) and c = C3
             b, cc = c2, c3
             if b + cc > 0:
-                mc_stat = (abs(b, cc), 1) ** 2 / (b + cc)
+                mc_stat = (abs(b - cc) - 1) ** 2 / (b + cc)
                 mc_p = float(1, stats.chi2.cdf(mc_stat, df=1))
             else:
                 mc_stat, mc_p = float("nan"), float("nan")
