@@ -9,8 +9,8 @@ are only interpretable against this.
 | `score_register_floor.py` | L0 under a register change, no compression |
 | `score_length_controlled.py` | rescoring with length held fixed |
 
-Generate the paired draw first (`--temperature 0.7 --suffix _paired` on the
-relevant runner), then:
+Generate the paired draw first (`--temperature 0.7 --paired_suffix _paired` on
+`experiments/run_experiment.py`), then:
 
 ```bash
 python score_sampling_floor.py          # --force to rescan finished cells

@@ -37,11 +37,19 @@ identically across both channels.
 
 ## Extension runners
 
-| Directory | Experiment |
-|---|---|
-| [`multilingual/`](multilingual/) | MGSM across ten non-English languages plus English. |
-| [`longform/`](longform/) | XSum and CNN/DailyMail summarization, Condition B only. |
-| [`size_sweep/`](size_sweep/) | Within-family scale ladder and the thinking-mode contrast. |
+| Directory | Experiment | Figure |
+|---|---|---|
+| [`multilingual/`](multilingual/) | MGSM across ten non-English languages plus English. | [ladder](../figures/mgsm_ladder.png) |
+| [`longform/`](longform/) | XSum and CNN/DailyMail summarization, Condition B only. | [token flows](../figures/longform_tokens.png) |
+| [`size_sweep/`](size_sweep/) | Within-family scale ladder and the thinking-mode contrast. | [sweep](../figures/size_sweep.png) |
+
+![MGSM ladder](../figures/mgsm_ladder.png)
+
+MGSM accuracy under output compression, one panel per language, ordered by how
+many tokens a question costs relative to English. The two API models keep or
+gain accuracy and their cost falls in every language; the open-weight models
+split. This is the multilingual version of the "run it on your own setting"
+point: the same constraint does not land the same way twice.
 
 ## Qwen3-family thinking mode
 

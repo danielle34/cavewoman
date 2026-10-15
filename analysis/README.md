@@ -6,6 +6,20 @@ paper. Each script is standalone and reads from a common
 [`config.yaml`](config.yaml); run them in the order below or invoke
 `run_all_analysis.py` to chain them all.
 
+What this stage produces, end to end:
+
+![Four outcomes](../figures/four_outcomes.png)
+
+The 2x2 split of every answer, correct or not against still saying the same
+thing or not, is the output of `collapse_thresholds.py` and the per-item labels
+in [`stats/`](stats/).
+
+![Twelve measures](../figures/alt_measures.png)
+
+`metric_validation.py` re-scores the same responses under twelve semantic
+measures. The gap survives all of them, which is what rules out a single-judge
+artifact.
+
 | Order | Script | Purpose |
 |---:|---|---|
 | 1 | `validate_results.py` | Sanity-check the input tree (file presence, schema, expected per-cell row counts). |
@@ -33,12 +47,12 @@ Standalone, not part of the numbered pipeline:
 
 ## Subpipelines
 
-| Folder | Reproduces |
-|---|---|
-| [`llmlingua/`](llmlingua/) | LLMLingua-2 input-compression comparison (paper appendix on LLMLingua comparison). |
-| [`judge/`](judge/) | LLM-judge runs and verdict extraction for NLI judge reliability calibration (paper appendix on judge reliability and semantic robustness). |
-| [`floors/`](floors/) | Reference floors: sampling, register, and length-controlled. |
-| [`stats/`](stats/) | Bootstrap CIs, Benjamini-Hochberg correction, and adjudicated per-item labels. |
+| Folder | Reproduces | Figure |
+|---|---|---|
+| [`llmlingua/`](llmlingua/) | LLMLingua-2 input-compression comparison (paper appendix on LLMLingua comparison). | [comparison](../figures/llmlingua_comparison.png) |
+| [`judge/`](judge/) | LLM-judge runs and verdict extraction for NLI judge reliability calibration (paper appendix on judge reliability and semantic robustness). | none |
+| [`floors/`](floors/) | Reference floors: sampling, register, and length-controlled. | [both references](../figures/l0neutral_ladder.png) |
+| [`stats/`](stats/) | Bootstrap CIs, Benjamini-Hochberg correction, and judge-corrected per-item labels. | [accuracy grid](../figures/accuracy_grid.png) |
 
 Each subfolder is self-contained and only needed when reproducing that
 part of the paper.

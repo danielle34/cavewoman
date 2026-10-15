@@ -15,7 +15,7 @@ You are a helpful assistant. Answer the following question accurately and comple
 
 - Used at: every level L0..L4.
 - Companion to: the per-level POS-filter rules described in
-  [`README.md`](README.md).
+  [`../README.md`](../README.md).
 - Symmetric to: the five per-level system prompts under
   [`../condition_B_output_constraint/`](../condition_B_output_constraint/),
   which restrict the response register.
