@@ -39,7 +39,7 @@ Defined in [`../benchmark/`](../benchmark/), prompts in [`../prompts/`](../promp
 
 | | |
 |---|---|
-| ![](robustness.png) | **`robustness.png`**: accuracy change under the telegraphic constraint, by model, by model size, and by language. The spread is the reason to run this yourself. |
+| ![](robustness.png) | **`robustness.png`**: accuracy change under the telegraphic constraint, by model, by model size, and by language. The spread is the reason to run this yourself. Panel (c) excludes MGSM questions whose uncompressed answer was cut off at the 400-token limit. |
 | ![](accuracy_grid.png) | **`accuracy_grid.png`**: the full grid: 8 models x 5 benchmarks x 5 levels x both channels. |
 | ![](cap_hit.png) | **`cap_hit.png`**: how often each model hit the token limit rather than stopping on its own. Needed to read the reasoning models correctly. |
 

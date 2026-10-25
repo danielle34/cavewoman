@@ -71,7 +71,7 @@
             <div class="publication-links">
 
               <span class="link-block">
-                <a href="https://www.alphaxiv.org/pdf/2606.24083v1" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
+                <a href="https://aclanthology.org/2026.emnlp-main.1235/" class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener noreferrer">
                   <span class="icon"><i class="fas fa-file-pdf"></i></span>
                   <span>Paper</span>
                 </a>
@@ -157,8 +157,7 @@
         <div class="content">
           <p>
             <strong>Our study found that two models from the same family can react very differently to the same
-            compression.</strong> Qwen2.5 lost 0.4 points of accuracy at L1. Qwen3.5, from the same family, lost 10.7 on
-            the same questions. So there is no level we can tell you to use. Run the CAVEWOMAN framework on your own
+            compression.</strong> So there is no level we can tell you to use. Run the CAVEWOMAN framework on your own
             model and your own task to find yours.
           </p>
           <p>
@@ -472,7 +471,7 @@ Answer: 18</pre>
         </div>
         <figure class="image" style="margin:1.5rem 0;">
           <img src="static/images/robustness.png" alt="Accuracy change varies by model, size, and language">
-          <figcaption class="has-text-centered is-size-7" style="color:#555;margin-top:0.6rem;">Accuracy change under the telegraphic constraint, by model, by model size, and by language.</figcaption>
+          <figcaption class="has-text-centered is-size-7" style="color:#555;margin-top:0.6rem;">Accuracy change under the telegraphic constraint, by model, by model size, and by language. Panel (c) leaves out the MGSM questions whose uncompressed answer ran past the 400-token limit and was cut off before stating an answer.</figcaption>
         </figure>
       </div>
     </div>
@@ -577,15 +576,23 @@ Answer: 18</pre>
     <div class="columns is-centered">
       <div class="column is-four-fifths">
         <h2 class="title is-3 has-text-centered">BibTeX</h2>
-<pre><code>@misc{adeyemi2026cavewoman,
-  title         = {CAVEWOMAN: How Large Language Models Behave Under
-                   Linguistic Input and Output Compression},
-  author        = {Adeyemi, Morayo Danielle and Rossi, Ryan A. and Dernoncourt, Franck},
-  year          = {2026},
-  eprint        = {2606.24083},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.CL},
-  url           = {https://arxiv.org/abs/2606.24083}
+<pre><code>@inproceedings{adeyemi-etal-2026-cavewoman,
+    title = "{CAVEWOMAN}: How Large Language Models Behave Under Linguistic Input and Output Compression",
+    author = "Adeyemi, Morayo Danielle  and
+      Rossi, Ryan A.  and
+      Dernoncourt, Franck",
+    editor = "Lee, Hung-Yi  and
+      Dev, Sunipa  and
+      Li, Jessy  and
+      Elliott, Desmond",
+    booktitle = "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing",
+    month = oct,
+    year = "2026",
+    address = "Budapest, Hungary",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2026.emnlp-main.1235/",
+    pages = "28162--28188",
+    ISBN = "979-8-89176-459-0",
 }</code></pre>
       </div>
     </div>
@@ -600,7 +607,7 @@ Answer: 18</pre>
     <div class="columns is-centered">
       <div class="column is-8 has-text-centered">
         <p>
-          <a class="icon-link" href="https://www.alphaxiv.org/pdf/2606.24083v1" aria-label="Paper PDF" target="_blank" rel="noopener noreferrer">
+          <a class="icon-link" href="https://aclanthology.org/2026.emnlp-main.1235/" aria-label="Paper PDF" target="_blank" rel="noopener noreferrer">
             <i class="fas fa-file-pdf"></i>
           </a>
           <a class="icon-link" href="https://github.com/danielle34/cavewoman" aria-label="Code on GitHub" target="_blank" rel="noopener noreferrer">

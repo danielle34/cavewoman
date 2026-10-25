@@ -185,6 +185,6 @@ Flag these honestly if they come up:
 
 ## Context
 
-Paper: [alphaxiv.org/pdf/2606.24083v1](https://www.alphaxiv.org/pdf/2606.24083v1) (EMNLP 2026)
+Paper: [aclanthology.org/2026.emnlp-main.1235](https://aclanthology.org/2026.emnlp-main.1235/) (EMNLP 2026)
 Data: [rayascript/cavewoman-data](https://huggingface.co/datasets/rayascript/cavewoman-data)
 Figures and findings: [`figures/`](figures/) and [`results/`](results/)

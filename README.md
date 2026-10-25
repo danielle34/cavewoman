@@ -2,7 +2,7 @@
 
 ![CAVEWOMAN](cavewoman_hero.png)
 
-*Paper: [alphaxiv.org/pdf/2606.24083v1](https://www.alphaxiv.org/pdf/2606.24083v1) (EMNLP 2026 Main Track) &nbsp;•&nbsp; Data: [rayascript/cavewoman-data](https://huggingface.co/datasets/rayascript/cavewoman-data) &nbsp;•&nbsp; [All figures](figures/)*
+*Paper: [alphaxiv.org/pdf/2606.24083v1](https://www.alphaxiv.org/pdf/2606.24083v1) ([ACL Anthology](https://aclanthology.org/2026.emnlp-main.1235/), EMNLP 2026 Main Track) &nbsp;•&nbsp; Data: [rayascript/cavewoman-data](https://huggingface.co/datasets/rayascript/cavewoman-data) &nbsp;•&nbsp; [All figures](figures/)*
 
 ---
 
@@ -37,10 +37,9 @@ The CAVEWOMAN framework strips text grammatically, at five levels:
 > Otherwise the commands are below.
 
 **Our study found that two models from the same family can react very differently
-to the same compression.** Qwen2.5 lost 0.4 points of accuracy at L1. Qwen3.5, from
-the same family, lost 10.7 on the same questions. So there is no level we can tell
-you to use. Run the CAVEWOMAN framework on your own model and your own task to find
-yours. A few dollars and some questions are enough.
+to the same compression.** So there is no level we can tell you to use. Run the
+CAVEWOMAN framework on your own model and your own task to find yours. A few dollars
+and some questions are enough.
 
 ```bash
 pip install -r requirements.txt
@@ -200,12 +199,8 @@ Scripts read `<results_root>/<tag>_<condition>/<dataset>/caveman_<tag>_<dataset>
 Tags are `gpt4o`, `gpt5.4`, `haiku`, `sonnet`, `qwen2.5`, `qwen3.5`, `deepseek`,
 `gemma4`, `kimi`.
 
-Always pass `--results-root PATH` to the `analysis/` scripts. They do not read
-`$CAVEWOMAN_RESULTS`, so setting it alone will silently aggregate the default
-tree instead of yours. The `evaluation/` scripts take `--results_dir` with an
-underscore and point at one `<tag>_<condition>/<dataset>` cell, not the root.
-The generations shipped here live under `results/samples/`, so use
-`--results-root ./results/samples` to analyze those.
+Always pass `--results-root PATH` to the `analysis/` scripts; they ignore
+`$CAVEWOMAN_RESULTS`. The shipped generations live under `results/samples/`.
 
 ---
 
@@ -228,15 +223,23 @@ The generations shipped here live under `results/samples/`, so use
 ## Cite
 
 ```bibtex
-@misc{adeyemi2026cavewoman,
-  title         = {CAVEWOMAN: How Large Language Models Behave Under
-                   Linguistic Input and Output Compression},
-  author        = {Adeyemi, Morayo Danielle and Rossi, Ryan A. and Dernoncourt, Franck},
-  year          = {2026},
-  eprint        = {2606.24083},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.CL},
-  url           = {https://arxiv.org/abs/2606.24083}
+@inproceedings{adeyemi-etal-2026-cavewoman,
+    title = "{CAVEWOMAN}: How Large Language Models Behave Under Linguistic Input and Output Compression",
+    author = "Adeyemi, Morayo Danielle  and
+      Rossi, Ryan A.  and
+      Dernoncourt, Franck",
+    editor = "Lee, Hung-Yi  and
+      Dev, Sunipa  and
+      Li, Jessy  and
+      Elliott, Desmond",
+    booktitle = "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing",
+    month = oct,
+    year = "2026",
+    address = "Budapest, Hungary",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2026.emnlp-main.1235/",
+    pages = "28162--28188",
+    ISBN = "979-8-89176-459-0",
 }
 ```
 
